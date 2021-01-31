@@ -1,0 +1,22 @@
+# protect pets | default: true
+Settings:
+  Tamed_Pet_Protect: true
+# message | parameter: <player> <target> <pet>| colorchar: &
+Message:
+  PvP_Toggle_ON: '&6Dein PvP mode ist aktiviert!' #No <pet> <target>
+  PvP_Toggle_OFF: '&6Dein PvP mode ist deaktiviert!' #No <pet> <target>
+  PvP_Toggle_Other_ON: '&6Du hast den Pvp mode von &b<target> &6aktiviert!' #No <pet>
+  PvP_Toggle_Other_OFF: '&6Du hast den Pvp mode von &b<target> &6deaktiviert!' #No <pet>
+  PvP_Toggle_Other_ON_Target: '&b<player> &6hat dein Pvp mode aktiviert!' #No <pet>
+  PvP_Toggle_Other_OFF_Target: '&b<player> &6hat dein Pvp mode deaktiviert!' #No <pet>
+  PvP_False_Both: '&6Du und &b<target> &6haben PVP deaktiviert!' #No <pet>
+  PvP_False_Self: '&6Du hast PVP deaktiviert!' #No <pet>
+  PvP_False_Other: '&b<target> &6hat PVP deaktiviert!' #No <pet>
+  PvP_Offline: '&c<target> ist offline!' #No <pet>
+  PvP_Pet_Protect: '&6Diese(r) &b<pet> &6steht unter dem Schutz von &b<target>&6!'
+  PvP_List: '&6PvP Liste:' #NoParameter
+  PvP_NotFound: '&cSpieler nicht gefunden' #NoParameter
+  PvP_Usage: '&cBitte /pvp <player> <true/false> benutzen!' #NoParameter
+  PvP_Wrong_Command: '&cBefehl nicht erkannt!' #NoParameter
+  PvP_NoPerm: '&cKeine Berechtigung!' #NoParameter
+  PvP_Nobody: '&cNiemand!' #NoParameter
