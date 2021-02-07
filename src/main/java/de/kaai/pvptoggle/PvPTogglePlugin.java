@@ -13,6 +13,10 @@ import de.kaai.pvptoggle.commands.PvpListCommand;
 import de.kaai.pvptoggle.listener.LeavePlayer;
 import de.kaai.pvptoggle.listener.OnPlayerAttacked;
 
+/*
+	Dieses Plugin wurde von Kaai für CT enwtickelt.
+ */
+
 public class PvPTogglePlugin extends JavaPlugin{
 	private static PvPTogglePlugin plugin;
 	
