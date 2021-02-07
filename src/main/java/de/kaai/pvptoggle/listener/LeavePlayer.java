@@ -10,8 +10,7 @@ public class LeavePlayer implements Listener {
 	
 	@EventHandler
 	public void leavePlayer(PlayerQuitEvent e) {
-		//L�scht den Spieler aus der PvP Liste
+		// Löscht den Spieler aus der PvP Liste
 		PvPTogglePlugin.removePvplist(e.getPlayer().getUniqueId());
 	}
-
 }

@@ -1,7 +1,7 @@
 name: PvPToggle
 version: 1.0
 api-version: 1.13
-main: de.kaai.pvptoggle.main.Main
+main: de.kaai.pvptoggle.PvPTogglePlugin
 
 commands:
    pvp:
