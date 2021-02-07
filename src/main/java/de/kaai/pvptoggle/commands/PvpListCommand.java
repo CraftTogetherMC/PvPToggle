@@ -3,6 +3,7 @@ package de.kaai.pvptoggle.commands;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.kaai.pvptoggle.PvPTogglePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -10,7 +11,6 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import de.kaai.pvptoggle.Main;
 import de.kaai.pvptoggle.util.Util;
 
 public class PvpListCommand implements TabExecutor{
@@ -18,7 +18,7 @@ public class PvpListCommand implements TabExecutor{
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		
-		FileConfiguration config = Main.getPlugin().getConfig();
+		FileConfiguration config = PvPTogglePlugin.getInstance().getConfig();
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 			if (!sender.hasPermission("pvptoggle.pvp.list")) {
@@ -27,9 +27,9 @@ public class PvpListCommand implements TabExecutor{
 			}
 			//Gib eine Liste mit Spieler die in der Pvp Liste auf true sind
 			player.sendMessage(Util.format(config.getString("Message.PvP_List")));
-			if(!Main.getPvplist().isEmpty()) {
+			if(!PvPTogglePlugin.getPvplist().isEmpty()) {
 				for (Player current : Bukkit.getOnlinePlayers()) {
-					if(Main.getPvplist().contains(current.getUniqueId()) ) {
+					if(PvPTogglePlugin.getPvplist().contains(current.getUniqueId()) ) {
 						player.sendMessage("§c" + current.getName());
 					}
 				}
