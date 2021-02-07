@@ -26,7 +26,12 @@ public class OnPlayerAttacked implements Listener {
 	@EventHandler
 	public void onPlayerAttacked(EntityDamageByEntityEvent e) {
 		DamageCause cause = e.getCause();
-		Entity damager;
+		Entity damager = e.getDamager();
+
+		//  Prüft ob Entity ein Citizens NPC ist
+		if (e.getEntity().hasMetadata("NPC"))
+			return;
+
 		switch (cause) {
 		case PROJECTILE:
 			Projectile projectile = (Projectile) e.getDamager();
@@ -36,17 +41,17 @@ public class OnPlayerAttacked implements Listener {
 				if(projectile.getShooter() instanceof Player && e.getEntity() instanceof Player) {
 					Player pl = (Player) e.getEntity();
 					Player att = (Player) projectile.getShooter();
-					//Beide sind nicht in der Liste
+					// Beide sind nicht in der Liste
 					if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 						att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 						e.setCancelled(true);
 					}
-					//att ist nicht in der Liste
+					// att ist nicht in der Liste
 					else if(PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 						att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 						e.setCancelled(true);
 					}
-					//pl ist nicht in der Liste
+					// pl ist nicht in der Liste
 					else if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 						att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 						e.setCancelled(true);
@@ -54,7 +59,7 @@ public class OnPlayerAttacked implements Listener {
 				}
 			}
 			
-			//Wenn ein Spieler ein Tameable angreift
+			// Wenn ein Spieler ein Tameable angreift
 			if(config.getBoolean("Settings.Tamed_Pet_Protect")) {
 				if(projectile.getShooter() instanceof Player && e.getEntity() instanceof Tameable) {
 					Tameable pet = (Tameable) e.getEntity();
@@ -63,22 +68,22 @@ public class OnPlayerAttacked implements Listener {
 						break;
 					if(e.getEntityType() == EntityType.WOLF) {
 						if(pet.getOwner() != null) {
-							//pl = Der Spieler der Angegriefen wird
+							// pl = Der Spieler der Angegriefen wird
 							Player pl = Bukkit.getPlayer(pet.getOwner().getUniqueId());
-							//att = Der Spieler dem Wolf gehört
+							// att = Der Spieler dem Wolf gehört
 							if(pl != null) {
 								if(pet.getOwner() != att) {
-									//Beide sind nicht in der Liste
+									// Beide sind nicht in der Liste
 									if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
-									//att ist nicht in der Liste
+									// att ist nicht in der Liste
 									else if(PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
-									//pl ist nicht in der Liste
+									// pl ist nicht in der Liste
 									else if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 										e.setCancelled(true);
@@ -100,28 +105,27 @@ public class OnPlayerAttacked implements Listener {
 			break;
 		
 		case ENTITY_ATTACK:
-			damager = e.getDamager();
 			if(damager instanceof Player && e.getEntity() instanceof Player) {
 				Player pl = (Player) e.getEntity();
 				Player att = (Player) damager;
-				//Beide sind nicht in der Liste
+				// Beide sind nicht in der Liste
 				if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
-				//att ist nicht in der Liste
+				// att ist nicht in der Liste
 				else if(PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
-				//pl ist nicht in der Liste
+				// pl ist nicht in der Liste
 				else if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
 			}
 			
-			//Wenn ein Spieler ein Tameable angreift
+			// Wenn ein Spieler ein Tameable angreift
 			if(config.getBoolean("Settings.Tamed_Pet_Protect")) {
 				if(damager instanceof Player && e.getEntity() instanceof Tameable) {
 					Tameable pet = (Tameable) e.getEntity();
@@ -130,22 +134,22 @@ public class OnPlayerAttacked implements Listener {
 						break;
 					if(e.getEntityType() == EntityType.WOLF) {
 						if(pet.getOwner() != null) {
-							//pl = Der Spieler der Angegriefen wird
+							// pl = Der Spieler der Angegriefen wird
 							Player pl = Bukkit.getPlayer(pet.getOwner().getUniqueId());
-							//att = Der Spieler dem Wolf gehört
+							// att = Der Spieler dem Wolf gehört
 							if(pl != null) {
 								if(pet.getOwner() != att) {
-									//Beide sind nicht in der Liste
+									// Beide sind nicht in der Liste
 									if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
-									//att ist nicht in der Liste
+									// att ist nicht in der Liste
 									else if(PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
-									//pl ist nicht in der Liste
+									// pl ist nicht in der Liste
 									else if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 										e.setCancelled(true);
@@ -163,13 +167,13 @@ public class OnPlayerAttacked implements Listener {
 					}
 				}
 				
-				//Wenn ein Zähmbares Tier ein Spieler angreift
+				// Wenn ein Zähmbares Tier ein Spieler angreift
 				if(e.getDamager() instanceof Tameable && e.getEntity() instanceof Player) {
 					Tameable pet = (Tameable) e.getDamager();
 					if (pet.getOwner() != null) {
 						Player owner = Bukkit.getPlayer(pet.getOwner().getUniqueId());
 						Player pl = (Player) e.getEntity();
-						//Beide, player oder angreifer sind nicht in der Liste
+						// Beide, player oder angreifer sind nicht in der Liste
 						if (!PvPTogglePlugin.getPvplist().contains(owner.getUniqueId()) || !PvPTogglePlugin.getPvplist().contains(pl.getUniqueId())) {
 							e.setCancelled(true);
 						}
@@ -177,30 +181,29 @@ public class OnPlayerAttacked implements Listener {
 				}	
 			}
 			break;
-			
+
 		case ENTITY_SWEEP_ATTACK:
-			damager = e.getDamager();
 			if(damager instanceof Player && e.getEntity() instanceof Player) {
 				Player pl = (Player) e.getEntity();
 				Player att = (Player) damager;
-				//Beide sind nicht in der Liste
+				// Beide sind nicht in der Liste
 				if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
-				//att ist nicht in der Liste
+				// att ist nicht in der Liste
 				else if(PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
-				//pl ist nicht in der Liste
+				// pl ist nicht in der Liste
 				else if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
 			}
-			
-			//Wenn ein Spieler ein Tameable angreift
+
+			// Wenn ein Spieler ein Tameable angreift
 			if(config.getBoolean("Settings.Tamed_Pet_Protect")) {
 				if(damager instanceof Player && e.getEntity() instanceof Tameable) {
 					Tameable pet = (Tameable) e.getEntity();
@@ -209,27 +212,27 @@ public class OnPlayerAttacked implements Listener {
 						break;
 					if(e.getEntityType() == EntityType.WOLF) {
 						if(pet.getOwner() != null) {
-							//pl = Der Spieler der Angegriefen wird
+							// pl = Der Spieler der Angegriefen wird
 							Player pl = Bukkit.getPlayer(pet.getOwner().getUniqueId());
-							//att = Der Spieler dem Wolf gehört
+							// att = Der Spieler dem Wolf gehört
 							if(pl != null) {
 								if(pet.getOwner() != att) {
-									//Beide sind nicht in der Liste
+									// Beide sind nicht in der Liste
 									if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
-									//att ist nicht in der Liste
+									// att ist nicht in der Liste
 									else if(PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
-									//pl ist nicht in der Liste
+									// pl ist nicht in der Liste
 									else if(!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
-								}	
+								}
 							} else if (pet.getOwner() != att) {
 								OfflinePlayer p = Bukkit.getOfflinePlayer(pet.getOwner().getUniqueId());
 								att.sendMessage(Util.format(config.getString("Message.PvP_Offline"), att.getName(), p.getName(), e.getEntity().getName()));
@@ -241,22 +244,22 @@ public class OnPlayerAttacked implements Listener {
 						e.setCancelled(true);
 					}
 				}
-				
-				//Wenn ein Zähmbares Tier ein Spieler angreift
+
+				// Wenn ein Zähmbares Tier ein Spieler angreift
 				if(e.getDamager() instanceof Tameable && e.getEntity() instanceof Player) {
 					Tameable pet = (Tameable) e.getDamager();
 					if (pet.getOwner() != null) {
 						Player owner = Bukkit.getPlayer(pet.getOwner().getUniqueId());
 						Player pl = (Player) e.getEntity();
-						//Beide, player oder angreifer sind nicht in der Liste
+						// Beide, player oder angreifer sind nicht in der Liste
 						if (!PvPTogglePlugin.getPvplist().contains(owner.getUniqueId()) || !PvPTogglePlugin.getPvplist().contains(pl.getUniqueId())) {
 							e.setCancelled(true);
 						}
 					}
-				}	
+				}
 			}
-			
-			
+
+
 			break;
 		default:
 			break;
@@ -273,13 +276,13 @@ public class OnPlayerAttacked implements Listener {
 				if(enti instanceof Player) {
 					Player pl = (Player) enti;
 
-					//Beide/pl/att sind nicht in der Liste
+					// Beide/pl/att sind nicht in der Liste
 					if((!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) || !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) &&
 						pl != att) {
 						e.setCancelled(true);
 					}
 				}
-				//Pet Protect
+				// Pet Protect
 				else if(enti instanceof Tameable) {
 					Tameable pet = (Tameable) enti;
 					if(pet.getOwner() != null && pet.getOwner().getUniqueId() != att.getUniqueId()) {
@@ -315,13 +318,13 @@ public class OnPlayerAttacked implements Listener {
 					if(enti instanceof Player) {
 						Player pl = (Player) enti;
 
-						//Beide/pl/att sind nicht in der Liste
+						// Beide/pl/att sind nicht in der Liste
 						if((!PvPTogglePlugin.getPvplist().contains(pl.getUniqueId()) || !PvPTogglePlugin.getPvplist().contains(att.getUniqueId())) &&
 								pl != att) {
 							e.setCancelled(true);
 						}
 					}
-					//Pet Protect
+					// Pet Protect
 					else if(enti instanceof Tameable) {
 						Tameable pet = (Tameable) enti;
 						if(pet.getOwner() != null && pet.getOwner().getUniqueId() != att.getUniqueId()) {
