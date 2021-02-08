@@ -2,12 +2,12 @@ package de.kaai.pvptoggle.util;
 
 import org.bukkit.ChatColor;
 
-public class Util {
+public class Util{
 	
 	//text <player> text text text
-		public static String format (String message, String playerName) {
-			String a = message.replace("<player>", playerName);
-			return ChatColor.translateAlternateColorCodes('&', a);
+	public static String format (String message, String playerName) {
+		String a = message.replace("<player>", playerName);
+		return ChatColor.translateAlternateColorCodes('&', a);
 		}
 	
 	//text <player> <target> -> text text text
@@ -64,8 +64,6 @@ public class Util {
 			break;
 		}
 		
-		
 		return x;
 	}
-	
 }
