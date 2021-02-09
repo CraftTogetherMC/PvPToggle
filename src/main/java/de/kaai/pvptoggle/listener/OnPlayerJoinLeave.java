@@ -60,7 +60,7 @@ public class OnPlayerJoinLeave implements Listener {
 				}
 				try {
 					if(!result.next()) { // Ab hier kommt ein Fehler. "Operation not allowed after ResultSet closed". Ich check nicht warum das so ist xd
-						mySQL.execute("INSERT INTO `"+ config.getString("MySQL.Database") + "`.`pvplist` (`id`, `uuid`, `playername`, `pvp`) VALUES (NULL, '" + user.getUniqueId() + "', '" + user.getName() + "', '0')");
+						mySQL.update("INSERT INTO `"+ config.getString("MySQL.Database") + "`.`pvplist` (`id`, `uuid`, `playername`, `pvp`) VALUES (NULL, '" + user.getUniqueId() + "', '" + user.getName() + "', '0')");
 					}
 				} catch (SQLException exception) {
 					exception.printStackTrace();
