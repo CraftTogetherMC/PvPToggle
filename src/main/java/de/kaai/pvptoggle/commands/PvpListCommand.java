@@ -27,9 +27,9 @@ public class PvpListCommand implements TabExecutor{
 			}
 			//Gib eine Liste mit Spieler die in der Pvp Liste auf true sind
 			player.sendMessage(Util.format(config.getString("Message.PvP_List")));
-			if(!PvPTogglePlugin.getPvplist().isEmpty()) {
+			if(!PvPTogglePlugin.getInstance().getPvplist().isEmpty()) {
 				for (Player current : Bukkit.getOnlinePlayers()) {
-					if(PvPTogglePlugin.getPvplist().contains(current.getUniqueId()) ) {
+					if(PvPTogglePlugin.getInstance().getPvplist().contains(current.getUniqueId()) ) {
 						player.sendMessage("§c" + current.getName());
 					}
 				}

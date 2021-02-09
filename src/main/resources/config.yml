@@ -1,7 +1,7 @@
 # protect pets | default: true
 Settings:
   Tamed_Pet_Protect: true
-  Keep_PvPlist_After_Logout: false
+  Keep_PvP_After_Logout: false
   MySQL: false
 # message | parameter: <player> <target> <pet> | colorchar: &
 Message:

@@ -73,7 +73,7 @@ public class PvpCommand implements TabExecutor {
 					sender.sendMessage(Util.format(config.getString("Message.PvP_NoPerm")));
 			}
 			
-			//pvp <Name0> <true/false>
+			//pvp <Name> <true/false>
 			else if (sender.hasPermission("pvptoggle.pvp.other"))
 			{
 				if (args.length == 2) {
