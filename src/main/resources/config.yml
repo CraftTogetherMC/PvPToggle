@@ -1,8 +1,7 @@
 # protect pets | default: true
 Settings:
   Tamed_Pet_Protect: true
-  Keep_PvP_After_Logout: false
-  MySQL: false
+  Keep_PvP_After_Logout: true
 # message | parameter: <player> <target> <pet> | colorchar: &
 Message:
   PvP_Toggle_ON: '&6Dein PvP mode ist aktiviert!' #available: <player>
@@ -26,6 +25,6 @@ Message:
 MySQL:
   Host: '127.0.0.1'
   Port: '3306'
-  Database: 'test_minecraft_pvplist'
-  Username: 'pvplist'
-  Password: 'test123'
+  Database: 'database'
+  Username: 'username'
+  Password: 'password'

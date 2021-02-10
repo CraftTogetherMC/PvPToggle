@@ -37,7 +37,6 @@ public class MySQLHandler {
     }
 
     public ResultSet query(String statement, final Object ...args) throws SQLException {
-        System.out.println(statement);
         if (args.length > 0) statement = String.format(statement, args);
         String finalStatement = statement;
 
@@ -49,6 +48,7 @@ public class MySQLHandler {
         preparedStatement = connection.prepareStatement(finalStatement);
         resultSet = preparedStatement.executeQuery();
 
+        /*
         if (resultSet != null) {
             try {
                 resultSet.close();
@@ -72,6 +72,7 @@ public class MySQLHandler {
                 System.out.println(e.getMessage());
             }
         }
+        */
 
         return resultSet;
     }
@@ -91,7 +92,6 @@ public class MySQLHandler {
     }
 
     public int update(String statement, final Object ...args) throws SQLException {
-        System.out.println(statement);
         if (args.length > 0) statement = String.format(statement, args);
         String finalStatement = statement;
 
@@ -137,7 +137,6 @@ public class MySQLHandler {
     }
 
     public Boolean execute(String statement, final Object ...args) throws SQLException {
-        System.out.println(statement);
         if (args.length > 0) statement = String.format(statement, args);
         String finalStatement = statement;
 

@@ -20,7 +20,7 @@ import de.kaai.pvptoggle.util.MySQLHandler;
 	Dieses Plugin wurde von Kaai für CT enwtickelt.
  */
 
-public class PvPTogglePlugin extends JavaPlugin{
+public class PvPTogglePlugin extends JavaPlugin{ // siehst du hier auch den fehler? <---- ro  t puuuuuuuh
 	private static PvPTogglePlugin plugin;
 
 	private static MySQLHandler mySQL;
@@ -37,11 +37,9 @@ public class PvPTogglePlugin extends JavaPlugin{
 		if(config == null)
 			return;
 		pvplist.add(playerUUID);
-		if(config.getBoolean("Settings.MySQL")) {
-			// mySQL.updateAsync("", (result, err) -> {
+		// mySQL.updateAsync("", (result, err) -> {
 
-			//});
-		}
+		//});
 	}
 	public void removePvplist(UUID playerUUID) {
 		if(config == null)
