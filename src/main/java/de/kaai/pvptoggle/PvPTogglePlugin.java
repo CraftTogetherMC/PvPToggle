@@ -20,7 +20,7 @@ import de.kaai.pvptoggle.util.MySQLHandler;
 	Dieses Plugin wurde von Kaai für CT enwtickelt.
  */
 
-public class PvPTogglePlugin extends JavaPlugin{ // siehst du hier auch den fehler? <---- ro  t puuuuuuuh
+public class PvPTogglePlugin extends JavaPlugin{
 	private static PvPTogglePlugin plugin;
 
 	private static MySQLHandler mySQL;
@@ -68,22 +68,21 @@ public class PvPTogglePlugin extends JavaPlugin{ // siehst du hier auch den fehl
 
 		config = PvPTogglePlugin.getInstance().getConfig();
 
-		if(config.getBoolean("Settings.MySQL")) {
-			// MySQL Daten wird aus der Config geholt
-			host = config.getString("MySQL.Host");
-			port = config.getInt("MySQL.Port");
-			database = config.getString("MySQL.Database");
-			username = config.getString("MySQL.Username");
-			password = config.getString("MySQL.Password");
-			mySQL = new MySQLHandler(host, port, database, username, password);
+		// MySQL Daten wird aus der Config geholt
+		host = config.getString("MySQL.Host");
+		port = config.getInt("MySQL.Port");
+		database = config.getString("MySQL.Database");
+		username = config.getString("MySQL.Username");
+		password = config.getString("MySQL.Password");
 
-			try {
-				String query =
-				"CREATE TABLE IF NOT EXISTS `minecraft`.`pvplist` ( `id` INT(11) NOT NULL AUTO_INCREMENT , `uuid` VARCHAR(36) NOT NULL , `playername` VARCHAR(16) NOT NULL , `pvp` BOOLEAN NULL DEFAULT NULL , PRIMARY KEY (`id`), INDEX (`uuid`)) ENGINE = InnoDB;";
-				mySQL.update(query);
-			} catch (SQLException exception) {
-				exception.printStackTrace();
-			}
+		mySQL = new MySQLHandler(host, port, database, username, password);
+
+		try {
+			String query =
+			"CREATE TABLE IF NOT EXISTS `minecraft`.`pvplist` ( `id` INT(11) NOT NULL AUTO_INCREMENT , `uuid` VARCHAR(36) NOT NULL , `playername` VARCHAR(16) NOT NULL , `pvp` BOOLEAN NULL DEFAULT NULL , PRIMARY KEY (`id`), INDEX (`uuid`)) ENGINE = InnoDB;";
+			mySQL.update(query);
+		} catch (SQLException exception) {
+			exception.printStackTrace();
 		}
 	}
 	

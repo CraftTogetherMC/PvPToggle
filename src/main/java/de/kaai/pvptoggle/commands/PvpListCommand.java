@@ -41,16 +41,17 @@ public class PvpListCommand implements TabExecutor{
 		}*/
 			MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
 			if(mySQL == null) {
-				player.sendMessage(Util.format("Fehler!"));
+				player.sendMessage(Util.format("Dein PvP Status konnte nicht geändern werden"));
+				return false;
 			}
-			mySQL.queryAsync(("SELECT `playername` FROM `" + config.getString("MySQL.Database") + "`.`pvplist` FROM `pvp` = 1"), ((result, thrown) -> {
+			mySQL.queryAsync(("SELECT `playername` FROM `" + config.getString("MySQL.Database") + "`.`pvplist` WHERE `pvp` = 1"), ((result, thrown) -> {
 
 				if(thrown == null) {
 					try {
 						if (result.next()) {
-							while (result.next()) {
+							do {
 								player.sendMessage("§c" + result.getString("playername"));
-							}
+							} while (!result.next());
 						} else {
 							player.sendMessage(Util.format(config.getString("Message.PvP_Nobody")));
 						}

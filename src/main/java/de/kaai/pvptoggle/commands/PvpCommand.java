@@ -39,6 +39,10 @@ public class PvpCommand implements TabExecutor {
 				if (plugin.getPvplist().contains(playerUUID)) {
 					plugin.removePvplist(playerUUID);
 					MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
+					if(mySQL == null) {
+						player.sendMessage(Util.format("Die PvP Liste kann nicht ausgegeben werden!"));
+						return false;
+					}
 					try {
 						mySQL.update("UPDATE `pvplist` SET `pvp` = '0' WHERE `pvplist`.`uuid` = '" + playerUUID + "'");
 					} catch (SQLException exception) {
