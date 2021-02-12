@@ -2,8 +2,6 @@ package de.kaai.pvptoggle.listener;
 
 import de.kaai.pvptoggle.PvPTogglePlugin;
 import de.kaai.pvptoggle.util.MySQLHandler;
-import de.kaai.pvptoggle.util.Util;
-import jdk.vm.ci.code.site.Call;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,14 +9,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.function.Supplier;
+
 
 
 public class OnPlayerJoinLeave implements Listener {
 
-	private FileConfiguration config;
+	private final FileConfiguration config;
 
 	public OnPlayerJoinLeave() {
 		config = PvPTogglePlugin.getInstance().getConfig();
@@ -41,19 +38,18 @@ public class OnPlayerJoinLeave implements Listener {
 
 	@EventHandler
 	public void joinPlayer(PlayerJoinEvent e) {
-
-		Player user = e.getPlayer();
+		Player player = e.getPlayer();
 
 		MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
 
 		if(mySQL == null) {
-			PvPTogglePlugin.getInstance().getLogger().info("Der PvP Status von " + user.getName() + " konnte nicht ermittelt werden!");
+			PvPTogglePlugin.getInstance().getLogger().info("Keine Verbindung zum MySQL-Server!");
 			return;
 		}
 
 		/*
 		try {
-			ResultSet result = mySQL.query("SELECT `uuid` FROM `" + config.getString("MySQL.Database") + "`.`pvplist` WHERE `uuid` = '" + user.getUniqueId() + "'");//, ((result, thrown) -> {
+			ResultSet result = mySQL.query("SELECT `uuid` FROM `" + config.getString("MySQL.Database") + "`.`pvplist` WHERE `uuid` = '" + player.getUniqueId() + "'");//, ((result, thrown) -> {
 			System.out.println(("Result closed: " + (result.isClosed() ? "Ja" : "Nein")));
 			if(result.next() ) {
 				PvPTogglePlugin.getInstance().getLogger().info("Bin schon drin! UUID = " + result.getString("uuid"));
@@ -67,14 +63,29 @@ public class OnPlayerJoinLeave implements Listener {
 			ex.printStackTrace();
 		}
 		*/
-		mySQL.queryAsync(("SELECT `uuid` FROM `" + config.getString("MySQL.Database") + "`.`pvplist` WHERE `uuid` = '" + user.getUniqueId() + "'"), ((result, thrown) -> {
+		mySQL.queryAsync(("SELECT `uuid` FROM `" + config.getString("MySQL.Database") + "`.`pvplist` WHERE `uuid` = '" + player.getUniqueId() + "'"), ((result, thrown) -> {
 
 			if(thrown == null) {
 				try {
 					if(result.next() ) {
 						PvPTogglePlugin.getInstance().getLogger().info("Bin schon drin!");
+						// Bungeecord Sync.. bzw ich versuchs xd
+						mySQL.queryAsync(("SELECT `pvp` FROM `" + config.getString("MySQL.Database") + "`.`pvplist` WHERE `uuid` = '" + player.getUniqueId() + "'"), (result2, thrown2) -> {
+							try {
+								if (result2.getInt("pvp") == 1) {
+									PvPTogglePlugin.getInstance().addPvplist(player.getUniqueId());
+
+								}
+								else {
+									PvPTogglePlugin.getInstance().removePvplist(player.getUniqueId());
+								}
+							} catch (SQLException exception) {
+								exception.printStackTrace();
+							}
+						});
+
 					} else {
-						mySQL.update("INSERT INTO `"+ config.getString("MySQL.Database") + "`.`pvplist` (`id`, `uuid`, `playername`, `pvp`) VALUES (NULL, '" + user.getUniqueId() + "', '" + user.getName() + "', '0')");
+						mySQL.update("INSERT INTO `"+ config.getString("MySQL.Database") + "`.`pvplist` (`id`, `uuid`, `playername`, `pvp`) VALUES (NULL, '" + player.getUniqueId() + "', '" + player.getName() + "', '0')");
 					}
 				} catch (SQLException exception) {
 					exception.printStackTrace();
