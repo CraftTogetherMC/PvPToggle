@@ -13,23 +13,40 @@ import java.sql.SQLException;
 public class MySQLAdapter {
     private static MySQLAdapter instance;
 
+    private static MySQLConfig config;
     private HikariDataSource dataSource;
 
     public interface Callback<E extends Throwable, V extends Object> {
-        public void call(E exception, V result);
+        void call(E exception, V result);
     }
 
-    public MySQLAdapter(String host, int port, String database, String user, String password) {
+    public MySQLAdapter(MySQLConfig _config) {
         instance = this;
+        config = _config;
+        setupHikari();
+    }
+
+    public MySQLAdapter(String host, int port, String database, String username, String password) {
+        instance = this;
+        config = new MySQLConfig(host, port, database, username, password);
+        setupHikari();
+    }
+
+    private void setupHikari() {
         this.dataSource = new HikariDataSource();
         this.dataSource.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
-        this.dataSource.addDataSourceProperty("serverName", host);
-        this.dataSource.addDataSourceProperty("port", port);
-        this.dataSource.addDataSourceProperty("databaseName", database);
-        this.dataSource.addDataSourceProperty("user", user);
-        this.dataSource.addDataSourceProperty("password", password);
+        this.dataSource.addDataSourceProperty("serverName", config.getHost());
+        this.dataSource.addDataSourceProperty("port", config.getPort());
+        this.dataSource.addDataSourceProperty("databaseName", config.getDatabase());
+        this.dataSource.addDataSourceProperty("user", config.getUsername());
+        this.dataSource.addDataSourceProperty("password", config.getPassword());
     }
 
+    public static MySQLAdapter getAdapter() {
+        return instance;
+    }
+
+    public MySQLConfig getConfig() { return config; }
     public MySQLConnection getConnection() {
         return new MySQLConnection();
     }
@@ -160,8 +177,69 @@ public class MySQLAdapter {
         };
     }
 
-    public static MySQLAdapter getAdapter() {
-        return instance;
+    public static class MySQLConfig {
+        String host;
+        int port;
+        String username;
+        String password;
+        String database;
+
+        public MySQLConfig() { }
+
+        public MySQLConfig(String host, int port, String username, String password) {
+            this.host = host;
+            this.port = port;
+            this.username = username;
+            this.password = password;
+        }
+
+        public MySQLConfig(String host, int port, String username, String password, String database) {
+            this.host = host;
+            this.port = port;
+            this.username = username;
+            this.password = password;
+            this.database = database;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public void setDatabase(String database) {
+            this.database = database;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public String getDatabase() {
+            return database;
+        }
     }
 }
 

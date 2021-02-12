@@ -1,16 +1,12 @@
 package de.kaai.pvptoggle.listener;
 
 import de.kaai.pvptoggle.PvPTogglePlugin;
-import de.kaai.pvptoggle.util.MySQLHandler;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-
-import java.sql.SQLException;
-
 
 
 public class OnPlayerJoinLeave implements Listener {
@@ -27,12 +23,9 @@ public class OnPlayerJoinLeave implements Listener {
 		if(!config.getBoolean("Settings.Keep_PvP_After_Logout")) {
 			PvPTogglePlugin.getInstance().removePvplist(e.getPlayer().getUniqueId());
 
-			MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
-			try {
-				mySQL.update("UPDATE `pvplist` SET `pvp` = '0' WHERE `pvplist`.`uuid` = '" + e.getPlayer().getUniqueId() + "'");
-			} catch (SQLException exception) {
-				exception.printStackTrace();
-			}
+			/* TODO: MySQL
+			mySQL.update("UPDATE `pvplist` SET `pvp` = '0' WHERE `pvplist`.`uuid` = '" + e.getPlayer().getUniqueId() + "'");
+			*/
 		}
 	}
 
@@ -40,14 +33,7 @@ public class OnPlayerJoinLeave implements Listener {
 	public void joinPlayer(PlayerJoinEvent e) {
 		Player player = e.getPlayer();
 
-		MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
-
-		if(mySQL == null) {
-			PvPTogglePlugin.getInstance().getLogger().info("Keine Verbindung zum MySQL-Server!");
-			return;
-		}
-
-		/*
+		/* TODO: MySQL
 		try {
 			ResultSet result = mySQL.query("SELECT `uuid` FROM `" + config.getString("MySQL.Database") + "`.`pvplist` WHERE `uuid` = '" + player.getUniqueId() + "'");//, ((result, thrown) -> {
 			System.out.println(("Result closed: " + (result.isClosed() ? "Ja" : "Nein")));
@@ -63,6 +49,8 @@ public class OnPlayerJoinLeave implements Listener {
 			ex.printStackTrace();
 		}
 		*/
+
+		/* TODO: MySQL
 		mySQL.queryAsync(("SELECT `uuid` FROM `" + config.getString("MySQL.Database") + "`.`pvplist` WHERE `uuid` = '" + player.getUniqueId() + "'"), ((result, thrown) -> {
 
 			if(thrown == null) {
@@ -94,12 +82,12 @@ public class OnPlayerJoinLeave implements Listener {
 				thrown.printStackTrace();
 			}
 
-			// TODO: Close ResultSet(?)
 			try {
 				result.close();
 			} catch (SQLException ex) {
 				ex.printStackTrace();
 			}
 		}));
+		*/
 	}
 }

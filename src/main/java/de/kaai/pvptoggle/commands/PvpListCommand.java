@@ -1,19 +1,16 @@
 package de.kaai.pvptoggle.commands;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
 import de.kaai.pvptoggle.PvPTogglePlugin;
-import de.kaai.pvptoggle.util.MySQLHandler;
-import org.bukkit.Bukkit;
+import de.kaai.pvptoggle.util.Util;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import de.kaai.pvptoggle.util.Util;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PvpListCommand implements TabExecutor{
 
@@ -39,6 +36,8 @@ public class PvpListCommand implements TabExecutor{
 			} else
 				player.sendMessage(Util.format(config.getString("Message.PvP_Nobody")));
 		}*/
+
+			/* TODO: MYSQL
 			MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
 			if(mySQL == null) {
 				player.sendMessage(Util.format("Dein PvP Status konnte nicht geändern werden"));
@@ -67,6 +66,7 @@ public class PvpListCommand implements TabExecutor{
 					ex.printStackTrace();
 				}
 			}));
+			 */
 		}
 		return false;
 	}

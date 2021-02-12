@@ -1,20 +1,18 @@
 package de.kaai.pvptoggle.commands;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import de.kaai.pvptoggle.util.MySQLHandler;
+import de.kaai.pvptoggle.PvPTogglePlugin;
+import de.kaai.pvptoggle.util.MySQLAdapter;
+import de.kaai.pvptoggle.util.Util;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import de.kaai.pvptoggle.PvPTogglePlugin;
-import de.kaai.pvptoggle.util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class PvpCommand implements TabExecutor {
 
@@ -22,10 +20,11 @@ public class PvpCommand implements TabExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		PvPTogglePlugin plugin = PvPTogglePlugin.getInstance();
 		FileConfiguration config = plugin.getConfig();
-		
+		MySQLAdapter MySQL = plugin.getMySQL();
+
 		if (sender instanceof Player) {
-			UUID playerUUID = ((OfflinePlayer) sender).getPlayer().getUniqueId();
-			Player player = ((Player) sender).getPlayer();
+			Player player = (Player) sender;
+			UUID playerUUID = player.getUniqueId();
 			
 			//pvp
 			if (args.length == 0)
@@ -36,29 +35,27 @@ public class PvpCommand implements TabExecutor {
 				}
 				
 				//toggle pvpmode
-				if (plugin.getPvplist().contains(playerUUID)) {
-					plugin.removePvplist(playerUUID);
-					MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
-					if(mySQL == null) {
-						player.sendMessage(Util.format("Die PvP Liste kann nicht ausgegeben werden!"));
-						return false;
-					}
-					try {
-						mySQL.update("UPDATE `pvplist` SET `pvp` = '0' WHERE `pvplist`.`uuid` = '" + playerUUID + "'");
-					} catch (SQLException exception) {
-						exception.printStackTrace();
-					}
-					player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_OFF"), player.getName()));
+				if (!plugin.getPvpList().contains(playerUUID)) {
+					plugin.addPvplist(playerUUID);
+
+					// Async!
+					MySQL.getConnection().updateAsync("UPDATE `?`.`?` SET `pvp` = '1' WHERE `pvplist`.`uuid` = '?'", (err, affectedRows) -> {
+						if (err != null)
+							err.printStackTrace();
+					}, MySQL.getConfig().getDatabase(), "pvplist", playerUUID).close();
+
+					player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_ON"), player.getName()));
 				}
 				else {
-					plugin.addPvplist(playerUUID);
-					MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
-					try {
-						mySQL.update("UPDATE `pvplist` SET `pvp` = '1' WHERE `pvplist`.`uuid` = '" + playerUUID + "'");
-					} catch (SQLException exception) {
-						exception.printStackTrace();
-					}
-					player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_ON"), player.getName()));
+					plugin.removePvplist(playerUUID);
+
+					// Async!
+					MySQL.getConnection().updateAsync("UPDATE `?`.`?` SET `pvp` = '0' WHERE `pvplist`.`uuid` = '?'", (err, affectedRows) -> {
+						if (err != null)
+							err.printStackTrace();
+					}, MySQL.getConfig().getDatabase(), "pvplist", playerUUID).close();
+
+					player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_OFF"), player.getName()));
 				}
 			}
 			
@@ -72,27 +69,36 @@ public class PvpCommand implements TabExecutor {
 					if (target != null) {
 						UUID targetUUID = target.getUniqueId();
 						
-						if (plugin.getPvplist().contains(targetUUID)) {
+						if (plugin.getPvpList().contains(targetUUID)) {
 							plugin.removePvplist(targetUUID);
+
+							/* TODO: MySQL
 							MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
 							try {
 								mySQL.update("UPDATE `pvplist` SET `pvp` = '0' WHERE `pvplist`.`uuid` = '" + targetUUID + "'");
 							} catch (SQLException exception) {
 								exception.printStackTrace();
-							}
+							}*/
+
 							player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_OFF"), player.getName(), target.getName()));
+
 							if (player.getUniqueId() != target.getUniqueId())
 								target.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_OFF_Target"), player.getName(), target.getName()));
 						}
 						else {
 							plugin.addPvplist(targetUUID);
+
+							/* TODO: MySQL
 							MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
 							try {
 								mySQL.update("UPDATE `pvplist` SET `pvp` = '1' WHERE `pvplist`.`uuid` = '" + targetUUID + "'");
 							} catch (SQLException exception) {
 								exception.printStackTrace();
 							}
+							 */
+
 							player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_ON"), player.getName(), target.getName()));
+
 							if (player.getUniqueId() != target.getUniqueId())
 								target.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_ON_Target"), player.getName(), target.getName()));
 							}
@@ -112,12 +118,16 @@ public class PvpCommand implements TabExecutor {
 					if (target != null) {
 						if (args[1].equalsIgnoreCase("true")) {
 							plugin.addPvplist(target.getUniqueId());
+
+							/* TODO: MySQL
 							MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
 							try {
 								mySQL.update("UPDATE `pvplist` SET `pvp` = '1' WHERE `pvplist`.`uuid` = '" + target.getUniqueId() + "'");
 							} catch (SQLException exception) {
 								exception.printStackTrace();
 							}
+							 */
+
 							player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_ON"), player.getName(), target.getName()));
 							
 							if (target.getUniqueId() != player.getUniqueId())
@@ -125,12 +135,16 @@ public class PvpCommand implements TabExecutor {
 						}
 						else if (args[1].equalsIgnoreCase("false")) {
 							plugin.removePvplist(target.getUniqueId());
+
+							/* TODO: MySQL
 							MySQLHandler mySQL = PvPTogglePlugin.getInstance().getMySQLHandler();
 							try {
 								mySQL.update("UPDATE `pvplist` SET `pvp` = '0' WHERE `pvplist`.`uuid` = '" + target.getUniqueId() + "'");
 							} catch (SQLException exception) {
 								exception.printStackTrace();
 							}
+							*/
+
 							player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_OFF"), player.getName(), target.getName()));
 							
 							if (target.getUniqueId() != player.getUniqueId())

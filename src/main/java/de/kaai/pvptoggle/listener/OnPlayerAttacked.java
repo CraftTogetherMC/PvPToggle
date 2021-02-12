@@ -42,17 +42,17 @@ public class OnPlayerAttacked implements Listener {
 					Player pl = (Player) e.getEntity();
 					Player att = (Player) projectile.getShooter();
 					// Beide sind nicht in der Liste
-					if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+					if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 						att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 						e.setCancelled(true);
 					}
 					// att ist nicht in der Liste
-					else if(PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+					else if(PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 						att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 						e.setCancelled(true);
 					}
 					// pl ist nicht in der Liste
-					else if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+					else if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 						att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 						e.setCancelled(true);
 					}
@@ -74,17 +74,17 @@ public class OnPlayerAttacked implements Listener {
 							if(pl != null) {
 								if(pet.getOwner() != att) {
 									// Beide sind nicht in der Liste
-									if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+									if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
 									// att ist nicht in der Liste
-									else if(PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+									else if(PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
 									// pl ist nicht in der Liste
-									else if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+									else if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
@@ -96,7 +96,7 @@ public class OnPlayerAttacked implements Listener {
 							}
 						}
 					} else {
-						att.sendMessage(Util.format(config.getString("Message.PvP_Pet_Protect"), att.getName(), pet.getOwner().getName(), Util.translater(pet.getName())));
+						att.sendMessage(Util.format(config.getString("Message.PvP_Pet_Protect"), att.getName(), pet.getOwner().getName(), Util.translator(pet.getName())));
 						e.setCancelled(true);
 					}
 				}
@@ -109,17 +109,17 @@ public class OnPlayerAttacked implements Listener {
 				Player pl = (Player) e.getEntity();
 				Player att = (Player) damager;
 				// Beide sind nicht in der Liste
-				if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+				if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
 				// att ist nicht in der Liste
-				else if(PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+				else if(PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
 				// pl ist nicht in der Liste
-				else if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+				else if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
@@ -140,17 +140,17 @@ public class OnPlayerAttacked implements Listener {
 							if(pl != null) {
 								if(pet.getOwner() != att) {
 									// Beide sind nicht in der Liste
-									if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+									if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
 									// att ist nicht in der Liste
-									else if(PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+									else if(PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
 									// pl ist nicht in der Liste
-									else if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+									else if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
@@ -162,7 +162,7 @@ public class OnPlayerAttacked implements Listener {
 							}
 						}
 					} else {
-						att.sendMessage(Util.format(config.getString("Message.PvP_Pet_Protect"), att.getName(), pet.getOwner().getName(), Util.translater(pet.getName())));
+						att.sendMessage(Util.format(config.getString("Message.PvP_Pet_Protect"), att.getName(), pet.getOwner().getName(), Util.translator(pet.getName())));
 						e.setCancelled(true);
 					}
 				}
@@ -174,7 +174,7 @@ public class OnPlayerAttacked implements Listener {
 						Player owner = Bukkit.getPlayer(pet.getOwner().getUniqueId());
 						Player pl = (Player) e.getEntity();
 						// Beide, player oder angreifer sind nicht in der Liste
-						if (!PvPTogglePlugin.getInstance().getPvplist().contains(owner.getUniqueId()) || !PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId())) {
+						if (!PvPTogglePlugin.getInstance().getPvpList().contains(owner.getUniqueId()) || !PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId())) {
 							e.setCancelled(true);
 						}
 					}
@@ -187,17 +187,17 @@ public class OnPlayerAttacked implements Listener {
 				Player pl = (Player) e.getEntity();
 				Player att = (Player) damager;
 				// Beide sind nicht in der Liste
-				if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+				if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
 				// att ist nicht in der Liste
-				else if(PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+				else if(PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
 				// pl ist nicht in der Liste
-				else if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+				else if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 					att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 					e.setCancelled(true);
 				}
@@ -218,17 +218,17 @@ public class OnPlayerAttacked implements Listener {
 							if(pl != null) {
 								if(pet.getOwner() != att) {
 									// Beide sind nicht in der Liste
-									if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+									if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
 									// att ist nicht in der Liste
-									else if(PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+									else if(PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
 									// pl ist nicht in der Liste
-									else if(!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) {
+									else if(!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) && PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) {
 										att.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), att.getName(), pl.getName()));
 										e.setCancelled(true);
 									}
@@ -240,7 +240,7 @@ public class OnPlayerAttacked implements Listener {
 							}
 						}
 					} else {
-						att.sendMessage(Util.format(config.getString("Message.PvP_Pet_Protect"), att.getName(), pet.getOwner().getName(), Util.translater(pet.getName())));
+						att.sendMessage(Util.format(config.getString("Message.PvP_Pet_Protect"), att.getName(), pet.getOwner().getName(), Util.translator(pet.getName())));
 						e.setCancelled(true);
 					}
 				}
@@ -252,7 +252,7 @@ public class OnPlayerAttacked implements Listener {
 						Player owner = Bukkit.getPlayer(pet.getOwner().getUniqueId());
 						Player pl = (Player) e.getEntity();
 						// Beide, player oder angreifer sind nicht in der Liste
-						if (!PvPTogglePlugin.getInstance().getPvplist().contains(owner.getUniqueId()) || !PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId())) {
+						if (!PvPTogglePlugin.getInstance().getPvpList().contains(owner.getUniqueId()) || !PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId())) {
 							e.setCancelled(true);
 						}
 					}
@@ -277,7 +277,7 @@ public class OnPlayerAttacked implements Listener {
 					Player pl = (Player) enti;
 
 					// Beide/pl/att sind nicht in der Liste
-					if((!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) || !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) &&
+					if((!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) || !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) &&
 						pl != att) {
 						e.setCancelled(true);
 					}
@@ -319,7 +319,7 @@ public class OnPlayerAttacked implements Listener {
 						Player pl = (Player) enti;
 
 						// Beide/pl/att sind nicht in der Liste
-						if((!PvPTogglePlugin.getInstance().getPvplist().contains(pl.getUniqueId()) || !PvPTogglePlugin.getInstance().getPvplist().contains(att.getUniqueId())) &&
+						if((!PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId()) || !PvPTogglePlugin.getInstance().getPvpList().contains(att.getUniqueId())) &&
 								pl != att) {
 							e.setCancelled(true);
 						}
@@ -328,7 +328,7 @@ public class OnPlayerAttacked implements Listener {
 					else if(enti instanceof Tameable) {
 						Tameable pet = (Tameable) enti;
 						if(pet.getOwner() != null && pet.getOwner().getUniqueId() != att.getUniqueId()) {
-							att.sendMessage(Util.format(config.getString("Message.PvP_Pet_Protect"), att.getName(), pet.getOwner().getName() , Util.translater(enti.getName())));
+							att.sendMessage(Util.format(config.getString("Message.PvP_Pet_Protect"), att.getName(), pet.getOwner().getName() , Util.translator(enti.getName())));
 							e.setCancelled(true);
 						}
 					}

@@ -27,43 +27,21 @@ public class Util{
 	
 	//NoParameter
 	public static String format (String message) {
-	return ChatColor.translateAlternateColorCodes('&', message);
+		return ChatColor.translateAlternateColorCodes('&', message);
 	}
 	
-	public static String translater (String entityName) {
-		
-		String x = "";
+	public static String translator (String entityName) {
 		switch (entityName) {
-		case "Cat":
-			x = "Katze";
-			break;
-		case "Donkey":
-			x = "Esel";
-			break;
-		case "Horse":
-			x = "Pferd";
-			break;
-		case "Llama":
-			x = "Lama";
-			break;
-		case "Mule":
-			x = "Maultier";
-			break;
-		case "Parrot":
-			x = "Papagei";
-			break;
-		case "Zombie Horse":
-			x = "Zombie Pferd";
-			break;
-		case "Skeleton Horse":
-			x = "Skelett Pferd";
-			break;
+			case "Cat":				return "Katze";
+			case "Donkey":			return "Esel";
+			case "Horse":			return "Pferd";
+			case "Llama":			return "Lama";
+			case "Mule":			return "Maultier";
+			case "Parrot":			return "Papagei";
+			case "Zombie Horse":	return "Zombie Pferd";
+			case "Skeleton Horse":	return "Skelett Pferd";
 
-		default:
-			x = entityName;
-			break;
+			default: return entityName;
 		}
-		
-		return x;
 	}
 }
