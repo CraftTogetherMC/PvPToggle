@@ -38,6 +38,9 @@ public class PvpCommand implements TabExecutor {
 				if (!plugin.getPvpList().contains(playerUUID)) {
 					plugin.addPvplist(playerUUID);
 
+					if (plugin.getConfig().getBoolean("Settings.Debug"))
+						plugin.getLogger().info("[MySQL]: Updating pvp-state of player '" + player.getName() + "' to 1 (enabled) ...");
+
 					// Async!
 					MySQL.getConnection().updateAsync("UPDATE `?`.`?` SET `pvp` = '1' WHERE `pvplist`.`uuid` = '?'", (err, affectedRows) -> {
 						if (err != null)
@@ -48,6 +51,9 @@ public class PvpCommand implements TabExecutor {
 				}
 				else {
 					plugin.removePvplist(playerUUID);
+
+					if (plugin.getConfig().getBoolean("Settings.Debug"))
+						plugin.getLogger().info("[MySQL]: Updating pvp-state of player '" + player.getName() + "' to 0 (disabled) ...");
 
 					// Async!
 					MySQL.getConnection().updateAsync("UPDATE `?`.`?` SET `pvp` = '0' WHERE `pvplist`.`uuid` = '?'", (err, affectedRows) -> {

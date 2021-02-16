@@ -1,7 +1,10 @@
 package de.kaai.pvptoggle.util;
 
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import de.kaai.pvptoggle.PvPTogglePlugin;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
 
 import javax.annotation.Nullable;
@@ -33,13 +36,21 @@ public class MySQLAdapter {
     }
 
     private void setupHikari() {
-        this.dataSource = new HikariDataSource();
-        this.dataSource.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
-        this.dataSource.addDataSourceProperty("serverName", config.getHost());
-        this.dataSource.addDataSourceProperty("port", config.getPort());
-        this.dataSource.addDataSourceProperty("databaseName", config.getDatabase());
-        this.dataSource.addDataSourceProperty("user", config.getUsername());
-        this.dataSource.addDataSourceProperty("password", config.getPassword());
+
+        try {
+            HikariConfig hikariCfg = new HikariConfig();
+            hikariCfg.setJdbcUrl("jdbc:mysql://" + config.getHost() + ":" + config.getPort() + ((config.getDatabase() != null) ? ("/" + config.getDatabase()) : ""));
+            hikariCfg.setUsername(config.getUsername());
+            hikariCfg.setPassword(config.getPassword());
+            hikariCfg.addDataSourceProperty("cachePrepStmts", "true");
+            hikariCfg.addDataSourceProperty("prepStmtCacheSize", "250");
+            hikariCfg.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+
+            this.dataSource = new HikariDataSource(hikariCfg);
+        }
+        catch (Throwable ex) {
+            System.out.println("MYSQL: " + ex.getMessage());
+        }
     }
 
     public static MySQLAdapter getAdapter() {
@@ -65,7 +76,7 @@ public class MySQLAdapter {
             Bukkit.getServer().getScheduler().runTaskAsynchronously(PvPTogglePlugin.getInstance(), task);
         }
 
-        public ResultSet query(String statement, final Object... args) throws SQLException {
+        public ResultSet query(String statement, final Object... args) throws Throwable {
             if (args.length > 0) statement = String.format(statement, args);
             String finalStatement = statement;
 
@@ -76,7 +87,7 @@ public class MySQLAdapter {
             return resultSet;
         }
 
-        public int update(String statement, final Object... args) throws SQLException {
+        public int update(String statement, final Object... args) throws Throwable {
             if (args.length > 0) statement = String.format(statement, args);
             String finalStatement = statement;
 
@@ -88,7 +99,7 @@ public class MySQLAdapter {
             return rows;
         }
 
-        public Boolean execute(String statement, final Object... args) throws SQLException {
+        public Boolean execute(String statement, final Object... args) throws Throwable {
             if (args.length > 0) statement = String.format(statement, args);
             String finalStatement = statement;
 
@@ -100,7 +111,7 @@ public class MySQLAdapter {
             return result;
         }
 
-        public MySQLConnection queryAsync(String statement, final @Nullable Callback<SQLException, ResultSet> callback, final Object... args) {
+        public MySQLConnection queryAsync(String statement, final @Nullable Callback<Throwable, ResultSet> callback, final Object... args) {
             if (args.length > 0) statement = String.format(statement, args);
             final String finalStatement = statement;
 
@@ -108,7 +119,7 @@ public class MySQLAdapter {
                 try {
                     ResultSet resultSet = query(finalStatement);
                     callback.call(null, resultSet);
-                } catch (SQLException e) {
+                } catch (Throwable e) {
                     callback.call(e, null);
                 }
             });
@@ -116,7 +127,7 @@ public class MySQLAdapter {
             return this;
         }
 
-        public MySQLConnection updateAsync(String statement, final @Nullable Callback<SQLException, Integer> callback, final Object... args) {
+        public MySQLConnection updateAsync(String statement, final @Nullable Callback<Throwable, Integer> callback, final Object... args) {
             if (args.length > 0) statement = String.format(statement, args);
             final String finalStatement = statement;
 
@@ -124,7 +135,7 @@ public class MySQLAdapter {
                 try {
                     int rows = update(finalStatement);
                     callback.call(null, rows);
-                } catch (SQLException e) {
+                } catch (Throwable e) {
                     callback.call(e, null);
                 }
             });
@@ -132,7 +143,7 @@ public class MySQLAdapter {
             return this;
         }
 
-        public MySQLConnection executeAsync(String statement, final @Nullable Callback<SQLException, Boolean> callback, final Object... args) {
+        public MySQLConnection executeAsync(String statement, final @Nullable Callback<Throwable, Boolean> callback, final Object... args) {
             if (args.length > 0) statement = String.format(statement, args);
             final String finalStatement = statement;
 
@@ -140,7 +151,7 @@ public class MySQLAdapter {
                 try {
                     Boolean result = execute(finalStatement);
                     callback.call(null, result);
-                } catch (SQLException e) {
+                } catch (Throwable e) {
                     callback.call(e, null);
                 }
             });
@@ -179,7 +190,7 @@ public class MySQLAdapter {
 
     public static class MySQLConfig {
         String host;
-        int port;
+        Integer port;
         String username;
         String password;
         String database;
@@ -199,6 +210,10 @@ public class MySQLAdapter {
             this.username = username;
             this.password = password;
             this.database = database;
+        }
+
+        public boolean checkInputs() {
+            return (this.host != null && port != null && username != null && password != null);
         }
 
         public void setHost(String host) {

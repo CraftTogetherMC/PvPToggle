@@ -2,6 +2,7 @@
 Settings:
   Tamed_Pet_Protect: true
   Keep_PvP_After_Logout: true
+  Debug: false
 # message | parameter: <player> <target> <pet> | colorchar: &
 Message:
   PvP_Toggle_ON: '&6Dein PvP mode ist aktiviert!' #available: <player>

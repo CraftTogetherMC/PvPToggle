@@ -37,16 +37,15 @@ public class MYSQL_EXAMPLE {
                     /* ... */
                 }
                 else {
-                    // Nothing found
+                    // Nothing foundy
                 }
 
-            } catch (SQLException ex) {
+            } catch (Throwable ex) {
                 ex.printStackTrace();
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        finally {
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        } finally {
             conn1.close();
         }
 
@@ -84,7 +83,7 @@ public class MYSQL_EXAMPLE {
             );
 
             System.out.println(affectedRows + " row(s) affected.");
-        } catch (SQLException ex) {
+        } catch (Throwable ex) {
             ex.printStackTrace();
         }
         finally {
@@ -119,7 +118,7 @@ public class MYSQL_EXAMPLE {
             );
 
             System.out.println(success ? "Execute was successful" : "Execute failed");
-        } catch (SQLException ex) {
+        } catch (Throwable ex) {
             ex.printStackTrace();
         }
         finally {
