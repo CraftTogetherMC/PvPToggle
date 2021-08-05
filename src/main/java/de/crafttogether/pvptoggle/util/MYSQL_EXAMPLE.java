@@ -1,7 +1,7 @@
-package de.kaai.pvptoggle.util;
+package de.crafttogether.pvptoggle.util;
 
-import de.kaai.pvptoggle.util.MySQLAdapter;
-import de.kaai.pvptoggle.util.MySQLAdapter.MySQLConnection;
+import de.crafttogether.pvptoggle.util.MySQLAdapter;
+import de.crafttogether.pvptoggle.util.MySQLAdapter.MySQLConnection;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
