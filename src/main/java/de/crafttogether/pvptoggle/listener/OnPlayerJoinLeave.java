@@ -1,6 +1,6 @@
-package de.kaai.pvptoggle.listener;
+package de.crafttogether.pvptoggle.listener;
 
-import de.kaai.pvptoggle.PvPTogglePlugin;
+import de.crafttogether.pvptoggle.PvPTogglePlugin;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,27 +11,26 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class OnPlayerJoinLeave implements Listener {
 
-	private final FileConfiguration config;
+    private final FileConfiguration config;
 
-	public OnPlayerJoinLeave() {
-		config = PvPTogglePlugin.getInstance().getConfig();
-	}
-	
-	@EventHandler
-	public void leavePlayer(PlayerQuitEvent e) {
-		// Löscht den Spieler aus der PvP Liste
-		if(!config.getBoolean("Settings.Keep_PvP_After_Logout")) {
-			PvPTogglePlugin.getInstance().removePvplist(e.getPlayer().getUniqueId());
+    public OnPlayerJoinLeave() {
+        config = PvPTogglePlugin.getInstance().getConfig();
+    }
+
+    @EventHandler
+    public void leavePlayer(PlayerQuitEvent e) {
+        if (!config.getBoolean("Settings.Keep_PvP_After_Logout")) {
+            PvPTogglePlugin.getInstance().removePvplist(e.getPlayer().getUniqueId());
 
 			/* TODO: MySQL
 			mySQL.update("UPDATE `pvplist` SET `pvp` = '0' WHERE `pvplist`.`uuid` = '" + e.getPlayer().getUniqueId() + "'");
 			*/
-		}
-	}
+        }
+    }
 
-	@EventHandler
-	public void joinPlayer(PlayerJoinEvent e) {
-		Player player = e.getPlayer();
+    @EventHandler
+    public void joinPlayer(PlayerJoinEvent e) {
+        Player player = e.getPlayer();
 
 		/* TODO: MySQL
 		try {
@@ -89,5 +88,5 @@ public class OnPlayerJoinLeave implements Listener {
 			}
 		}));
 		*/
-	}
+    }
 }
