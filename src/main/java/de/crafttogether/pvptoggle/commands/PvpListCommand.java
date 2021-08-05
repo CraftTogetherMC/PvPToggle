@@ -1,31 +1,30 @@
-package de.kaai.pvptoggle.commands;
+package de.crafttogether.pvptoggle.commands;
 
-import de.kaai.pvptoggle.PvPTogglePlugin;
-import de.kaai.pvptoggle.util.Util;
+import de.crafttogether.pvptoggle.PvPTogglePlugin;
+import de.crafttogether.pvptoggle.util.Util;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PvpListCommand implements TabExecutor{
+public class PvpListCommand implements TabExecutor {
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		
-		FileConfiguration config = PvPTogglePlugin.getInstance().getConfig();
-		if (sender instanceof Player) {
-			Player player = (Player) sender;
-			if (!sender.hasPermission("pvptoggle.pvp.list")) {
-				sender.sendMessage(Util.format(config.getString("Message.PvP_NoPerm")));
-				return false;
-			}
-			//Gib eine Liste mit Spieler die in der Pvp Liste auf true sind
-			player.sendMessage(Util.format(config.getString("Message.PvP_List")));
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
+        FileConfiguration config = PvPTogglePlugin.getInstance().getConfig();
+
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            if (!sender.hasPermission("pvptoggle.pvp.list")) {
+                sender.sendMessage(Util.format(config.getString("Message.PvP_NoPerm")));
+                return false;
+            }
+            player.sendMessage(Util.format(config.getString("Message.PvP_List")));
 			/*
 			if(!PvPTogglePlugin.getInstance().getPvplist().isEmpty()) {
 				for (Player current : Bukkit.getOnlinePlayers()) {
@@ -67,12 +66,12 @@ public class PvpListCommand implements TabExecutor{
 				}
 			}));
 			 */
-		}
-		return false;
-	}
-	@Override
-	public List<String> onTabComplete(CommandSender arg0, Command arg1, String arg2, String[] arg3) {
-		ArrayList<String> newList = new ArrayList<String>();
-		return newList;
-	}
+        }
+        return false;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender arg0, Command arg1, String arg2, String[] arg3) {
+        return new ArrayList<>();
+    }
 }
