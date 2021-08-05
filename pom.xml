@@ -15,7 +15,6 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <testserver.pluginfolder>C:\Users\Joscha\Desktop\CT\Testumgebungen\Server\devserver\plugins\update</testserver.pluginfolder>
     </properties>
 
     <build>
@@ -65,15 +64,6 @@
                                     <type>${project.packaging}</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
-                                    <destFileName>${project.name}.${project.packaging}</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>${project.packaging}</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${testserver.pluginfolder}</outputDirectory>
                                     <destFileName>${project.name}.${project.packaging}</destFileName>
                                 </artifactItem>
                             </artifactItems>
