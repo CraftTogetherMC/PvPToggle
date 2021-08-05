@@ -1,10 +1,8 @@
-package de.kaai.pvptoggle.util;
+package de.crafttogether.pvptoggle.util;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import de.kaai.pvptoggle.PvPTogglePlugin;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import de.crafttogether.pvptoggle.PvPTogglePlugin;
 import org.bukkit.Bukkit;
 
 import javax.annotation.Nullable;
@@ -185,7 +183,7 @@ public class MySQLAdapter {
             }
 
             return this;
-        };
+        }
     }
 
     public static class MySQLConfig {
