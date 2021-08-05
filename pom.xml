@@ -4,17 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.kaai</groupId>
+    <groupId>de.crafttogether</groupId>
     <artifactId>PvPToggle</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>PvPToggle</name>
 
-    <description>PvP management plugin</description>
+    <description>PvP Management Plugin</description>
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+<!--     <testserver.pluginfolder>C:\Users\Kaai\IdeaProjects\PvPToggle\target</testserver.pluginfolder>-->
         <testserver.pluginfolder>C:\Users\Joscha\Desktop\CT\Testumgebungen\Server\devserver\plugins\update</testserver.pluginfolder>
     </properties>
 
