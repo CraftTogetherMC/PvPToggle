@@ -6,10 +6,7 @@ import de.crafttogether.pvptoggle.PvPTogglePlugin;
 import org.bukkit.Bukkit;
 
 import javax.annotation.Nullable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class MySQLAdapter {
     private static MySQLAdapter instance;
@@ -17,13 +14,13 @@ public class MySQLAdapter {
     private static MySQLConfig config;
     private HikariDataSource dataSource;
 
-    public interface Callback<E extends Throwable, V extends Object> {
+    public interface Callback<E extends Throwable, V> {
         void call(E exception, V result);
     }
 
-    public MySQLAdapter(MySQLConfig _config) {
+    public MySQLAdapter(MySQLConfig config) {
         instance = this;
-        config = _config;
+        MySQLAdapter.config = config;
         setupHikari();
     }
 
@@ -37,32 +34,35 @@ public class MySQLAdapter {
 
         try {
             HikariConfig hikariCfg = new HikariConfig();
-            hikariCfg.setJdbcUrl("jdbc:mysql://" + config.getHost() + ":" + config.getPort() + ((config.getDatabase() != null) ? ("/" + config.getDatabase()) : ""));
+            hikariCfg.setJdbcUrl("jdbc:mysql://" + config.getHost() + ":" + config.getPort() +
+                    ((config.getDatabase() != null) ? ("/" + config.getDatabase()) : ""));
             hikariCfg.setUsername(config.getUsername());
             hikariCfg.setPassword(config.getPassword());
             hikariCfg.addDataSourceProperty("cachePrepStmts", "true");
             hikariCfg.addDataSourceProperty("prepStmtCacheSize", "250");
             hikariCfg.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
 
-            this.dataSource = new HikariDataSource(hikariCfg);
+            dataSource = new HikariDataSource(hikariCfg);
+        } catch (Throwable ex) {
+            PvPTogglePlugin.getInstance().getLogger().warning("[MySQL]: " + ex.getMessage());
         }
-        catch (Throwable ex) {
-            System.out.println("MYSQL: " + ex.getMessage());
-        }
+    }
+
+    public void disconnect() {
+        // TODO: Should we call .close() on all instantiated MySQLConnection-Objects here?
+        dataSource.close();
     }
 
     public static MySQLAdapter getAdapter() {
         return instance;
     }
 
-    public MySQLConfig getConfig() { return config; }
-    public MySQLConnection getConnection() {
-        return new MySQLConnection();
+    public MySQLConfig getConfig() {
+        return config;
     }
 
-    public void disconnect() {
-        // TODO: Should we call .close() on all instantiated MySQLConnection-Objects here?
-        dataSource.close();
+    public MySQLConnection getConnection() {
+        return new MySQLConnection();
     }
 
     public class MySQLConnection {
@@ -90,6 +90,7 @@ public class MySQLAdapter {
             String finalStatement = statement;
 
             int rows = 0;
+
             connection = dataSource.getConnection();
             preparedStatement = connection.prepareStatement(finalStatement);
             rows = preparedStatement.executeUpdate();
@@ -101,7 +102,7 @@ public class MySQLAdapter {
             if (args.length > 0) statement = String.format(statement, args);
             String finalStatement = statement;
 
-            Boolean result = false;
+            boolean result = false;
             connection = dataSource.getConnection();
             preparedStatement = connection.prepareStatement(finalStatement);
             result = preparedStatement.execute();
@@ -116,8 +117,10 @@ public class MySQLAdapter {
             executeAsync(() -> {
                 try {
                     ResultSet resultSet = query(finalStatement);
+                    assert callback != null;
                     callback.call(null, resultSet);
                 } catch (Throwable e) {
+                    assert callback != null;
                     callback.call(e, null);
                 }
             });
@@ -132,8 +135,10 @@ public class MySQLAdapter {
             executeAsync(() -> {
                 try {
                     int rows = update(finalStatement);
+                    assert callback != null;
                     callback.call(null, rows);
                 } catch (Throwable e) {
+                    assert callback != null;
                     callback.call(e, null);
                 }
             });
@@ -148,8 +153,10 @@ public class MySQLAdapter {
             executeAsync(() -> {
                 try {
                     Boolean result = execute(finalStatement);
+                    assert callback != null;
                     callback.call(null, result);
                 } catch (Throwable e) {
+                    assert callback != null;
                     callback.call(e, null);
                 }
             });
@@ -162,7 +169,7 @@ public class MySQLAdapter {
                 try {
                     resultSet.close();
                 } catch (SQLException e) {
-                    System.out.println(e.getMessage());
+                    PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
                 }
             }
 
@@ -170,7 +177,7 @@ public class MySQLAdapter {
                 try {
                     preparedStatement.close();
                 } catch (SQLException e) {
-                    System.out.println(e.getMessage());
+                    PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
                 }
             }
 
@@ -178,7 +185,7 @@ public class MySQLAdapter {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-                    System.out.println(e.getMessage());
+                    PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
                 }
             }
 
@@ -193,7 +200,8 @@ public class MySQLAdapter {
         String password;
         String database;
 
-        public MySQLConfig() { }
+        public MySQLConfig() {
+        }
 
         public MySQLConfig(String host, int port, String username, String password) {
             this.host = host;
@@ -211,7 +219,7 @@ public class MySQLAdapter {
         }
 
         public boolean checkInputs() {
-            return (this.host != null && port != null && username != null && password != null);
+            return (this.host != null && port != null && port != 0 && username != null && password != null);
         }
 
         public void setHost(String host) {
