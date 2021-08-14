@@ -1,7 +1,6 @@
 # protect pets | default: true
 Settings:
   Tamed_Pet_Protect: true
-  Keep_PvP_After_Logout: true
   Debug: false
 # message | parameter: <player> <target> <pet> | color char: &
 Message:
@@ -25,7 +24,7 @@ Message:
 # MySQL | Need SELECT, INSERT, UPDATE, DELETE and CREATE permissions
 MySQL:
   Host: '127.0.0.1'
-  Port: '3306'
+  Port: 3306
   Database: 'database'
   Username: 'username'
   Password: 'password'
