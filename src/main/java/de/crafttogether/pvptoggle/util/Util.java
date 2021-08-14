@@ -27,24 +27,16 @@ public class Util {
     }
 
     public static String translator(String entityName) {
-        switch (entityName) {
-            case "Cat":
-                return "Katze";
-            case "Donkey":
-                return "Esel";
-            case "Horse":
-                return "Pferd";
-            case "Llama":
-                return "Lama";
-            case "Mule":
-                return "Maultier";
-            case "Parrot":
-                return "Papagei";
-            case "Zombie Horse":
-                return "Zombie Pferd";
-            case "Skeleton Horse":
-                return "Skelett Pferd";
-        }
-        return entityName;
+        return switch (entityName) {
+            case "Cat" -> "Katze";
+            case "Donkey" -> "Esel";
+            case "Horse" -> "Pferd";
+            case "Llama" -> "Lama";
+            case "Mule" -> "Maultier";
+            case "Parrot" -> "Papagei";
+            case "Zombie Horse" -> "Zombie Pferd";
+            case "Skeleton Horse" -> "Skelett Pferd";
+            default -> entityName;
+        };
     }
 }
