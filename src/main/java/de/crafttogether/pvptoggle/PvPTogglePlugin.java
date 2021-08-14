@@ -4,18 +4,23 @@ import de.crafttogether.pvptoggle.commands.PvpCommand;
 import de.crafttogether.pvptoggle.commands.PvpListCommand;
 import de.crafttogether.pvptoggle.listener.OnPlayerAttacked;
 import de.crafttogether.pvptoggle.listener.OnPlayerJoinLeave;
+import de.crafttogether.pvptoggle.listener.OnPluginMessageReceived;
 import de.crafttogether.pvptoggle.util.MySQLAdapter;
 import de.crafttogether.pvptoggle.util.MySQLAdapter.MySQLConfig;
 import de.crafttogether.pvptoggle.util.MySQLAdapter.MySQLConnection;
+import de.crafttogether.pvptoggle.util.Util;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
 
 /*
@@ -24,37 +29,53 @@ import java.util.UUID;
 
 public class PvPTogglePlugin extends JavaPlugin {
     private static PvPTogglePlugin plugin;
-    private static MySQLAdapter MySQL;
+    private static FileConfiguration config;
+    private static MySQLAdapter mySQL;
+    private static final ArrayList<UUID> pvpList = new ArrayList<>();
 
-    private ArrayList<UUID> pvpList = new ArrayList<>();
-
+    @Override
     public void onEnable() {
 
-        Logger.getLogger("com.zaxxer.hikari.pool.PoolBase").setLevel(Level.OFF);
-        Logger.getLogger("com.zaxxer.hikari.pool.HikariPool").setLevel(Level.OFF);
-        Logger.getLogger("com.zaxxer.hikari.HikariDataSource").setLevel(Level.OFF);
-        Logger.getLogger("com.zaxxer.hikari.HikariConfig").setLevel(Level.OFF);
-        Logger.getLogger("com.zaxxer.hikari.util.DriverDataSource").setLevel(Level.OFF);
+        Arrays.asList(
+                        "com.zaxxer.hikari.pool.PoolBase", "com.zaxxer.hikari.pool.HikariPool",
+                        "com.zaxxer.hikari.HikariDataSource", "com.zaxxer.hikari.HikariConfig",
+                        "com.zaxxer.hikari.util.DriverDataSource")
+                .forEach(s -> Logger.getLogger(s).setLevel(Level.OFF));
 
         plugin = this;
 
-        getCommand("pvp").setExecutor(new PvpCommand());
-        getCommand("pvplist").setExecutor(new PvpListCommand());
+        Objects.requireNonNull(getCommand("pvp")).setExecutor(new PvpCommand());
+        Objects.requireNonNull(getCommand("pvplist")).setExecutor(new PvpListCommand());
 
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new OnPlayerAttacked(), this);
         pluginManager.registerEvents(new OnPlayerJoinLeave(), this);
 
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new OnPluginMessageReceived());
+
+
         getConfig();
         saveDefaultConfig();
+        config = preloadConfig(getConfig());
 
+        setupMySql(config);
+    }
 
-        FileConfiguration config = getConfig();
+    @Override
+    public void onDisable() {
+        getServer().getMessenger().unregisterOutgoingPluginChannel(this);
+        getServer().getMessenger().unregisterIncomingPluginChannel(this);
+
+        if (mySQL != null)
+            mySQL.disconnect();
+    }
+
+    private void setupMySql(Configuration config) {
 
         if (getConfig().getBoolean("Settings.Debug"))
             getLogger().info("[MySQL]: Initialize Adapter...");
 
-        // Setup MySQLConfig
         MySQLConfig myCfg = new MySQLConfig();
         myCfg.setHost(config.getString("MySQL.Host"));
         myCfg.setPort(config.getInt("MySQL.Port"));
@@ -67,50 +88,53 @@ public class PvPTogglePlugin extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
         }
 
-        // Initialize MySQLAdapter
-        try {
-            MySQL = new MySQLAdapter(myCfg);
-        } catch (Exception e) {
-
-        }
+        mySQL = new MySQLAdapter(myCfg);
 
         if (getConfig().getBoolean("Settings.Debug"))
             getLogger().info("[MySQL]: Create Tables ...");
 
-        // Create Tables
+        MySQLConnection connection = mySQL.getConnection();
         try {
-            MySQLConnection conn = MySQL.getConnection();
-
-            String query = "CREATE TABLE IF NOT EXISTS `minecraft`.`pvplist` (" +
+            String query = "CREATE TABLE IF NOT EXISTS `" + myCfg.getDatabase() + "`.`pvplist` (" +
                     "`id` INT(11) NOT NULL AUTO_INCREMENT, " +
                     "`uuid` VARCHAR(36) NOT NULL, " +
                     "`playername` VARCHAR(16) NOT NULL, " +
                     "`pvp` BOOLEAN NULL DEFAULT NULL, " +
                     "PRIMARY KEY (`id`), INDEX (`uuid`)) ENGINE = InnoDB;";
 
-            conn.execute(query);
+            connection.execute(query);
+
         } catch (SQLException ex) {
             getLogger().warning("[MySQL]: " + ex.getMessage());
         } catch (Throwable ex) {
             getLogger().warning("[EX]: " + ex.getMessage());
+        } finally {
+            connection.close();
         }
     }
 
-    public void onDisable() {
-        if (MySQL != null)
-            MySQL.disconnect();
+    private FileConfiguration preloadConfig(FileConfiguration config) {
+        String[] paths = {
+                "Message.PvP_List",
+                "Message.PvP_NotFound",
+                "Message.PvP_Usage",
+                "Message.PvP_Wrong_Command",
+                "Message.PvP_NoPerm",
+                "Message.PvP_Nobody"
+        };
+
+        for (String path : paths) {
+            config.set(path, Util.format(config.getString(path)));
+        }
+        return config;
     }
 
-    public ArrayList<UUID> getPvpList() {
+    public static FileConfiguration getPreloadConfig() {
+        return config;
+    }
+
+    public static ArrayList<UUID> getPvpList() {
         return pvpList;
-    }
-
-    public void addPvplist(UUID playerUUID) {
-        pvpList.add(playerUUID);
-    }
-
-    public void removePvplist(UUID playerUUID) {
-        pvpList.remove(playerUUID);
     }
 
     public static PvPTogglePlugin getInstance() {
@@ -118,6 +142,6 @@ public class PvPTogglePlugin extends JavaPlugin {
     }
 
     public static MySQLAdapter getMySQL() {
-        return MySQL;
+        return mySQL;
     }
 }
