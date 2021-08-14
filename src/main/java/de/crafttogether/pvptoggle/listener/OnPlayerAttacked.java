@@ -17,7 +17,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.potion.PotionEffect;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -26,7 +25,7 @@ public class OnPlayerAttacked implements Listener {
     FileConfiguration config = PvPTogglePlugin.getInstance().getConfig();
 
     @EventHandler
-    public void onPlayerAttacked(@NotNull EntityDamageByEntityEvent e) {
+    public void onPlayerAttacked(EntityDamageByEntityEvent e) {
         DamageCause cause = e.getCause();
         Entity damager = e.getDamager();
 
@@ -35,79 +34,61 @@ public class OnPlayerAttacked implements Listener {
             return;
 
         switch (cause) {
-            case PROJECTILE:
+            case PROJECTILE -> {
                 Projectile projectile = (Projectile) e.getDamager();
                 projectile.getShooter();
-
                 if (projectile.getType() != EntityType.SNOWBALL && projectile.getType() != EntityType.ENDER_PEARL && projectile.getType() != EntityType.EGG) {
-                    if (projectile.getShooter() instanceof Player && e.getEntity() instanceof Player) {
-                        Player pl = (Player) e.getEntity();
-                        Player att = (Player) projectile.getShooter();
+                    if (projectile.getShooter() instanceof Player att && e.getEntity() instanceof Player pl) {
                         pvpListCheck(e, pl, att);
                     }
                 }
-
                 if (config.getBoolean("Settings.Tamed_Pet_Protect")) {
-                    if (projectile.getShooter() instanceof Player && e.getEntity() instanceof Tameable) {
-                        Tameable pet = (Tameable) e.getEntity();
-                        Player att = (Player) projectile.getShooter();
+                    if (projectile.getShooter() instanceof Player att && e.getEntity() instanceof Tameable pet) {
                         petProtectCheck(e, pet, att);
                     }
                 }
-                break;
-
-            case ENTITY_ATTACK:
-            case ENTITY_SWEEP_ATTACK:
-                if (damager instanceof Player && e.getEntity() instanceof Player) {
-                    Player pl = (Player) e.getEntity();
-                    Player att = (Player) damager;
+            }
+            case ENTITY_ATTACK, ENTITY_SWEEP_ATTACK -> {
+                if (damager instanceof Player att && e.getEntity() instanceof Player pl) {
                     pvpListCheck(e, pl, att);
                 }
-
                 if (config.getBoolean("Settings.Tamed_Pet_Protect")) {
-                    if (damager instanceof Player && e.getEntity() instanceof Tameable) {
-                        Tameable pet = (Tameable) e.getEntity();
-                        Player att = (Player) damager;
+                    if (damager instanceof Player att && e.getEntity() instanceof Tameable pet) {
                         petProtectCheck(e, pet, att);
                     }
 
-                    if (e.getDamager() instanceof Tameable && e.getEntity() instanceof Player) {
-                        Tameable pet = (Tameable) e.getDamager();
+                    if (e.getDamager() instanceof Tameable pet && e.getEntity() instanceof Player) {
                         if (pet.getOwner() != null) {
                             Player owner = Bukkit.getPlayer(pet.getOwner().getUniqueId());
                             Player pl = (Player) e.getEntity();
                             // Beide, player oder angreifer sind nicht in der Liste
                             assert owner != null;
-                            if (!PvPTogglePlugin.getInstance().getPvpList().contains(owner.getUniqueId()) || !PvPTogglePlugin.getInstance().getPvpList().contains(pl.getUniqueId())) {
+                            if (!PvPTogglePlugin.getPvpList().contains(owner.getUniqueId()) || !PvPTogglePlugin.getPvpList().contains(pl.getUniqueId())) {
                                 e.setCancelled(true);
                             }
                         }
                     }
                 }
-
-                break;
+            }
         }
     }
 
     @EventHandler
-    public void onPlayerAttacked(@NotNull AreaEffectCloudApplyEvent e) {
+    public void onPlayerAttacked(AreaEffectCloudApplyEvent e) {
 
-        if (e.getEntity().getSource() instanceof Player) {
-            Player attacking = (Player) e.getEntity().getSource();
+        if (e.getEntity().getSource() instanceof Player attacking) {
 
             for (Entity entity : e.getAffectedEntities()) {
-                if (entity instanceof Player) {
-                    Player player = (Player) entity;
+                if (entity instanceof Player player) {
 
                     // Beide/player/attacking sind nicht in der Liste
-                    if ((!PvPTogglePlugin.getInstance().getPvpList().contains(player.getUniqueId()) || !PvPTogglePlugin.getInstance().getPvpList().contains(attacking.getUniqueId())) &&
+                    if ((!PvPTogglePlugin.getPvpList().contains(player.getUniqueId()) || !PvPTogglePlugin.getPvpList().contains(attacking.getUniqueId())) &&
                             player != attacking) {
                         e.setCancelled(true);
                     }
                 }
                 // Pet Protect
-                else if (entity instanceof Tameable) {
-                    Tameable pet = (Tameable) entity;
+                else if (entity instanceof Tameable pet) {
                     if (pet.getOwner() != null && pet.getOwner().getUniqueId() != attacking.getUniqueId()) {
                         e.setCancelled(true);
                     }
@@ -117,10 +98,9 @@ public class OnPlayerAttacked implements Listener {
     }
 
     @EventHandler
-    public void onPlayerAttacked(@NotNull PotionSplashEvent e) {
+    public void onPlayerAttacked(PotionSplashEvent e) {
 
-        if (e.getEntity().getShooter() instanceof Player) {
-            Player attacking = (Player) e.getEntity().getShooter();
+        if (e.getEntity().getShooter() instanceof Player attacking) {
             PotionEffect potion = null;
 
             for (PotionEffect potionEffect : e.getPotion().getEffects()) {
@@ -135,18 +115,16 @@ public class OnPlayerAttacked implements Listener {
                 for (Entity entity : e.getAffectedEntities()) {
 
 
-                    if (entity instanceof Player) {
-                        Player player = (Player) entity;
+                    if (entity instanceof Player player) {
 
                         // Beide/player/attacking sind nicht in der Liste
-                        if ((!PvPTogglePlugin.getInstance().getPvpList().contains(player.getUniqueId()) || !PvPTogglePlugin.getInstance().getPvpList().contains(attacking.getUniqueId())) &&
+                        if ((!PvPTogglePlugin.getPvpList().contains(player.getUniqueId()) || !PvPTogglePlugin.getPvpList().contains(attacking.getUniqueId())) &&
                                 player != attacking) {
                             e.setCancelled(true);
                         }
                     }
                     // Pet Protect
-                    else if (entity instanceof Tameable) {
-                        Tameable pet = (Tameable) entity;
+                    else if (entity instanceof Tameable pet) {
                         if (pet.getOwner() != null && pet.getOwner().getUniqueId() != attacking.getUniqueId()) {
                             attacking.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Pet_Protect")), attacking.getName(), pet.getOwner().getName(), Util.translator(entity.getName())));
                             e.setCancelled(true);
@@ -158,7 +136,7 @@ public class OnPlayerAttacked implements Listener {
         }
     }
 
-    private void petProtectCheck(EntityDamageByEntityEvent e, @NotNull Tameable pet, Player attacking) {
+    private void petProtectCheck(EntityDamageByEntityEvent e, Tameable pet, Player attacking) {
         if (pet.getOwner() == null || pet.getOwner().getUniqueId() == attacking.getUniqueId())
             return;
         if (e.getEntityType() == EntityType.WOLF) {
@@ -180,14 +158,14 @@ public class OnPlayerAttacked implements Listener {
         }
     }
 
-    private void pvpListCheck(EntityDamageByEntityEvent e, @NotNull Player player, Player attacking) {
-        if (!PvPTogglePlugin.getInstance().getPvpList().contains(player.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(attacking.getUniqueId())) {
+    private void pvpListCheck(EntityDamageByEntityEvent e, Player player, Player attacking) {
+        if (!PvPTogglePlugin.getPvpList().contains(player.getUniqueId()) && !PvPTogglePlugin.getPvpList().contains(attacking.getUniqueId())) {
             attacking.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_False_Both")), attacking.getName(), player.getName()));
             e.setCancelled(true);
-        } else if (PvPTogglePlugin.getInstance().getPvpList().contains(player.getUniqueId()) && !PvPTogglePlugin.getInstance().getPvpList().contains(attacking.getUniqueId())) {
+        } else if (PvPTogglePlugin.getPvpList().contains(player.getUniqueId()) && !PvPTogglePlugin.getPvpList().contains(attacking.getUniqueId())) {
             attacking.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_False_Self")), attacking.getName(), player.getName()));
             e.setCancelled(true);
-        } else if (!PvPTogglePlugin.getInstance().getPvpList().contains(player.getUniqueId()) && PvPTogglePlugin.getInstance().getPvpList().contains(attacking.getUniqueId())) {
+        } else if (!PvPTogglePlugin.getPvpList().contains(player.getUniqueId()) && PvPTogglePlugin.getPvpList().contains(attacking.getUniqueId())) {
             attacking.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_False_Other")), attacking.getName(), player.getName()));
             e.setCancelled(true);
         }
