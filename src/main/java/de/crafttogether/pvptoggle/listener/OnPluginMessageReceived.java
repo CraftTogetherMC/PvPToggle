@@ -75,7 +75,7 @@ public class OnPluginMessageReceived implements PluginMessageListener {
                     PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
                 }
                 connection.close();
-            }, "pvplist");
+            }, connection.getTablePrefix() + "pvplist");
         }
         else if (subchannel.equals("pvptoggle")) {
             short len = in.readShort();
@@ -86,7 +86,7 @@ public class OnPluginMessageReceived implements PluginMessageListener {
             String command = null;
             try {
                 command = msgin.readUTF();
-                short somenumber = msgin.readShort();
+                short uselessNummber = msgin.readShort();
             } catch (IOException e) {
                 e.printStackTrace();
             }
