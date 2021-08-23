@@ -27,7 +27,7 @@ public class PvpCommand implements TabExecutor {
             UUID playerUUID = player.getUniqueId();
             if (!PvPTogglePlugin.pvpList().containsKey(playerUUID)) {
                 PvPTogglePlugin.getInstance().updatePvplist();
-                player.sendMessage("Du warst gar nicht im cache drin. Ich trag dich ein");
+                player.sendMessage(config.getString("Message.PvP_Error"));
                 return false;
             }
 
@@ -118,7 +118,7 @@ public class PvpCommand implements TabExecutor {
                 plugin.getLogger().warning("[MySQL]: " + err.getMessage());
             plugin.updateAllProxyCachesCommand(player);
             connection.close();
-        }, "pvplist", player.getUniqueId());
+        }, connection.getTablePrefix() + "pvplist", player.getUniqueId());
 
     }
 
@@ -134,7 +134,7 @@ public class PvpCommand implements TabExecutor {
                 plugin.getLogger().warning("[MySQL]: " + err.getMessage());
             plugin.updateAllProxyCachesCommand(player);
             connection.close();
-        }, "pvplist", player.getUniqueId());
+        }, connection.getTablePrefix() + "pvplist", player.getUniqueId());
 
     }
 
