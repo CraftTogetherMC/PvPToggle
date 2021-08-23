@@ -1,6 +1,5 @@
 package de.crafttogether.pvptoggle.util;
 
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
 import org.bukkit.Bukkit;
@@ -18,51 +17,44 @@ public class MySQLAdapter {
         void call(E exception, V result);
     }
 
-    public MySQLAdapter(MySQLConfig config) {
+    public MySQLAdapter(MySQLConfig _config) {
         instance = this;
-        MySQLAdapter.config = config;
+        config = _config;
         setupHikari();
     }
 
-    public MySQLAdapter(String host, int port, String database, String username, String password) {
+    public MySQLAdapter(String host, int port, String database, String username, String password, String tablePrefix) {
         instance = this;
-        config = new MySQLConfig(host, port, database, username, password);
+        config = new MySQLConfig(host, port, database, username, password, tablePrefix);
         setupHikari();
     }
 
     private void setupHikari() {
+        this.dataSource = new HikariDataSource();
+        this.dataSource.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
+        this.dataSource.addDataSourceProperty("serverName", config.getHost());
+        this.dataSource.addDataSourceProperty("port", config.getPort());
 
-        try {
-            HikariConfig hikariCfg = new HikariConfig();
-            hikariCfg.setJdbcUrl("jdbc:mysql://" + config.getHost() + ":" + config.getPort() +
-                    ((config.getDatabase() != null) ? ("/" + config.getDatabase()) : ""));
-            hikariCfg.setUsername(config.getUsername());
-            hikariCfg.setPassword(config.getPassword());
-            hikariCfg.addDataSourceProperty("cachePrepStmts", "true");
-            hikariCfg.addDataSourceProperty("prepStmtCacheSize", "250");
-            hikariCfg.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        if (config.getDatabase() != null)
+            this.dataSource.addDataSourceProperty("databaseName", config.getDatabase());
 
-            dataSource = new HikariDataSource(hikariCfg);
-        } catch (Throwable ex) {
-            PvPTogglePlugin.getInstance().getLogger().warning("[MySQL]: " + ex.getMessage());
-        }
-    }
-
-    public void disconnect() {
-        // TODO: Should we call .close() on all instantiated MySQLConnection-Objects here?
-        dataSource.close();
+        this.dataSource.addDataSourceProperty("user", config.getUsername());
+        this.dataSource.addDataSourceProperty("password", config.getPassword());
+        this.dataSource.setAutoCommit(true);
     }
 
     public static MySQLAdapter getAdapter() {
         return instance;
     }
 
-    public MySQLConfig getConfig() {
-        return config;
-    }
-
     public MySQLConnection getConnection() {
         return new MySQLConnection();
+    }
+
+    public void disconnect() {
+        // TODO: Should we call .close() on all instantiated MySQLConnection-Objects here?
+        // ¯\_(ツ)_/¯
+        dataSource.close();
     }
 
     public class MySQLConnection {
@@ -74,90 +66,159 @@ public class MySQLAdapter {
             Bukkit.getServer().getScheduler().runTaskAsynchronously(PvPTogglePlugin.getInstance(), task);
         }
 
-        public ResultSet query(String statement, final Object... args) throws Throwable {
+        public ResultSet query(String statement, final Object... args) throws SQLException {
             if (args.length > 0) statement = String.format(statement, args);
             String finalStatement = statement;
 
-            connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(finalStatement);
-            resultSet = preparedStatement.executeQuery();
+            try {
+                connection = dataSource.getConnection();
+                preparedStatement = connection.prepareStatement(finalStatement);
+                resultSet = preparedStatement.executeQuery();
+            }
+            catch (SQLException e) {
+                if (e.getMessage().contains("link failure"))
+                    PvPTogglePlugin.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                else
+                    throw e;
+            }
 
             return resultSet;
         }
 
-        public int update(String statement, final Object... args) throws Throwable {
+        public int insert(String statement, final Object... args) throws SQLException {
+            if (args.length > 0) statement = String.format(statement, args);
+            String finalStatement = statement;
+
+            int lastInsertedId = 0;
+            try {
+                connection = dataSource.getConnection();
+                preparedStatement = connection.prepareStatement(finalStatement, Statement.RETURN_GENERATED_KEYS);
+                preparedStatement.executeUpdate();
+
+                resultSet = preparedStatement.getGeneratedKeys();
+                if (resultSet.next())
+                    lastInsertedId = resultSet.getInt(1);
+            }
+            catch (SQLException e) {
+                if (e.getMessage().contains("link failure"))
+                    PvPTogglePlugin.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                else
+                    throw e;
+            }
+
+            return lastInsertedId;
+        }
+
+        public int update(String statement, final Object... args) throws SQLException {
             if (args.length > 0) statement = String.format(statement, args);
             String finalStatement = statement;
 
             int rows = 0;
-
-            connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(finalStatement);
-            rows = preparedStatement.executeUpdate();
+            try {
+                connection = dataSource.getConnection();
+                preparedStatement = connection.prepareStatement(finalStatement);
+                rows = preparedStatement.executeUpdate();
+            }
+            catch (SQLException e) {
+                if (e.getMessage().contains("link failure"))
+                    PvPTogglePlugin.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                else
+                    throw e;
+            }
 
             return rows;
         }
 
-        public Boolean execute(String statement, final Object... args) throws Throwable {
+        public Boolean execute(String statement, final Object... args) throws SQLException {
             if (args.length > 0) statement = String.format(statement, args);
             String finalStatement = statement;
 
-            boolean result = false;
-            connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(finalStatement);
-            result = preparedStatement.execute();
+            Boolean result = false;
+            try {
+                connection = dataSource.getConnection();
+                preparedStatement = connection.prepareStatement(finalStatement);
+                result = preparedStatement.execute();
+            }
+            catch (SQLException e) {
+                if (e.getMessage().contains("link failure"))
+                    PvPTogglePlugin.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                else
+                    throw e;
+            }
 
             return result;
         }
 
-        public MySQLConnection queryAsync(String statement, final @Nullable Callback<Throwable, ResultSet> callback, final Object... args) {
+        public MySQLConnection queryAsync(String statement, final @Nullable Callback<SQLException, ResultSet> callback, final Object... args) {
             if (args.length > 0) statement = String.format(statement, args);
             final String finalStatement = statement;
 
             executeAsync(() -> {
                 try {
                     ResultSet resultSet = query(finalStatement);
-                    assert callback != null;
                     callback.call(null, resultSet);
-                } catch (Throwable e) {
-                    assert callback != null;
-                    callback.call(e, null);
+                } catch (SQLException e) {
+                    if (e.getMessage().contains("link failure"))
+                        PvPTogglePlugin.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                    else
+                        callback.call(e, null);
                 }
             });
 
             return this;
         }
 
-        public MySQLConnection updateAsync(String statement, final @Nullable Callback<Throwable, Integer> callback, final Object... args) {
+        public MySQLConnection insertAsync(String statement, final @Nullable Callback<SQLException, Integer> callback, final Object... args) {
+            if (args.length > 0) statement = String.format(statement, args);
+            final String finalStatement = statement;
+
+            executeAsync(() -> {
+                try {
+                    int lastInsertedId = insert(finalStatement);
+                    callback.call(null, lastInsertedId);
+                } catch (SQLException e) {
+                    if (e.getMessage().contains("link failure"))
+                        PvPTogglePlugin.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                    else
+                        callback.call(e, 0);
+                }
+            });
+
+            return this;
+        }
+
+        public MySQLConnection updateAsync(String statement, final @Nullable Callback<SQLException, Integer> callback, final Object... args) {
             if (args.length > 0) statement = String.format(statement, args);
             final String finalStatement = statement;
 
             executeAsync(() -> {
                 try {
                     int rows = update(finalStatement);
-                    assert callback != null;
                     callback.call(null, rows);
-                } catch (Throwable e) {
-                    assert callback != null;
-                    callback.call(e, null);
+                } catch (SQLException e) {
+                    if (e.getMessage().contains("link failure"))
+                        PvPTogglePlugin.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                    else
+                        callback.call(e, 0);
                 }
             });
 
             return this;
         }
 
-        public MySQLConnection executeAsync(String statement, final @Nullable Callback<Throwable, Boolean> callback, final Object... args) {
+        public MySQLConnection executeAsync(String statement, final @Nullable Callback<SQLException, Boolean> callback, final Object... args) {
             if (args.length > 0) statement = String.format(statement, args);
             final String finalStatement = statement;
 
             executeAsync(() -> {
                 try {
-                    Boolean result = execute(finalStatement);
-                    assert callback != null;
+                    boolean result = execute(finalStatement);
                     callback.call(null, result);
-                } catch (Throwable e) {
-                    assert callback != null;
-                    callback.call(e, null);
+                } catch (SQLException e) {
+                    if (e.getMessage().contains("link failure"))
+                        PvPTogglePlugin.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                    else
+                        callback.call(e, false);
                 }
             });
 
@@ -169,7 +230,7 @@ public class MySQLAdapter {
                 try {
                     resultSet.close();
                 } catch (SQLException e) {
-                    PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
+                    System.out.println(e.getMessage());
                 }
             }
 
@@ -177,7 +238,7 @@ public class MySQLAdapter {
                 try {
                     preparedStatement.close();
                 } catch (SQLException e) {
-                    PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
+                    System.out.println(e.getMessage());
                 }
             }
 
@@ -185,11 +246,15 @@ public class MySQLAdapter {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-                    PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
+                    System.out.println(e.getMessage());
                 }
             }
 
             return this;
+        };
+
+        public String getTablePrefix() {
+            return config.getTablePrefix();
         }
     }
 
@@ -199,9 +264,9 @@ public class MySQLAdapter {
         String username;
         String password;
         String database;
+        String tablePrefix;
 
-        public MySQLConfig() {
-        }
+        public MySQLConfig() { }
 
         public MySQLConfig(String host, int port, String username, String password) {
             this.host = host;
@@ -210,57 +275,42 @@ public class MySQLAdapter {
             this.password = password;
         }
 
-        public MySQLConfig(String host, int port, String username, String password, String database) {
+        public MySQLConfig(String host, int port, String username, String password, String database, String tablePrefix) {
             this.host = host;
             this.port = port;
             this.username = username;
             this.password = password;
             this.database = database;
+            this.tablePrefix = tablePrefix;
         }
 
         public boolean checkInputs() {
-            return (this.host != null && port != null && port != 0 && username != null && password != null);
+            if (tablePrefix == null) tablePrefix = "";
+            return (this.host != null && port != null && username != null && password != null);
         }
 
-        public void setHost(String host) {
-            this.host = host;
-        }
+        public void setHost(String host) { this.host = host; }
 
-        public void setPort(int port) {
-            this.port = port;
-        }
+        public void setPort(int port) { this.port = port; }
 
-        public void setUsername(String username) {
-            this.username = username;
-        }
+        public void setUsername(String username) { this.username = username; }
 
-        public void setPassword(String password) {
-            this.password = password;
-        }
+        public void setPassword(String password) { this.password = password; }
 
-        public void setDatabase(String database) {
-            this.database = database;
-        }
+        public void setDatabase(String database) { this.database = database; }
 
-        public String getHost() {
-            return host;
-        }
+        public void setTablePrefix(String tablePrefix) { this.tablePrefix = tablePrefix; }
 
-        public int getPort() {
-            return port;
-        }
+        public String getHost() { return host; }
 
-        public String getUsername() {
-            return username;
-        }
+        public int getPort() { return port; }
 
-        public String getPassword() {
-            return password;
-        }
+        public String getUsername() { return username; }
 
-        public String getDatabase() {
-            return database;
-        }
+        public String getPassword() { return password; }
+
+        public String getDatabase() { return database; }
+
+        public String getTablePrefix() { return tablePrefix; }
     }
 }
-
