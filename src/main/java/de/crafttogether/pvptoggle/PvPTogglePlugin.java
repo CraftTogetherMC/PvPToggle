@@ -2,7 +2,6 @@ package de.crafttogether.pvptoggle;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import de.crafttogether.pvptoggle.commands.DebugCommand;
 import de.crafttogether.pvptoggle.commands.PvpCommand;
 import de.crafttogether.pvptoggle.commands.PvpListCommand;
 import de.crafttogether.pvptoggle.commands.PvpState;
@@ -53,8 +52,6 @@ public class PvPTogglePlugin extends JavaPlugin {
         getCommand("pvp").setExecutor(new PvpCommand());
         getCommand("pvplist").setExecutor(new PvpListCommand());
         getCommand("pvpstate").setExecutor(new PvpState());
-        // THIS COMMAND WILL BE REMOVED
-        getCommand("pvpdebug").setExecutor(new DebugCommand());
 
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new OnPlayerAttacked(), this);
@@ -90,11 +87,13 @@ public class PvPTogglePlugin extends JavaPlugin {
         myCfg.setUsername(config.getString("MySQL.Username"));
         myCfg.setPassword(config.getString("MySQL.Password"));
         myCfg.setDatabase(config.getString("MySQL.Database"));
+        myCfg.setTablePrefix(config.getString("MySQL.TablePrefix"));
 
         if ((!myCfg.checkInputs() || myCfg.getDatabase() == null) ||
-                (myCfg.getDatabase().equals("database") &&
-                myCfg.getUsername().equals("username") &&
-                myCfg.getPassword().equals("password") &&
+                (myCfg.getDatabase().equals("yourDatabase") &&
+                myCfg.getUsername().equals("yourUsername") &&
+                myCfg.getPassword().equals("yourPassword") &&
+                myCfg.getTablePrefix().equals("pt_") &&
                 myCfg.getPort() == 3306 &&
                 myCfg.getHost().equals("127.0.0.1"))) {
             getLogger().warning("[MySQL]: Invalid configuration! Please check your config.yml");
@@ -112,10 +111,9 @@ public class PvPTogglePlugin extends JavaPlugin {
                         "`playername` VARCHAR(16) NOT NULL , " +
                         "`uuid` VARCHAR(36) NOT NULL , " +
                         "`pvpstate` BOOLEAN NULL DEFAULT NULL , " +
-                        "`timestamp` TIMESTAMP NOT NULL , " +
                         "PRIMARY KEY (`id`), INDEX (`uuid`)) ENGINE = InnoDB;";
 
-                connection.execute(query, myCfg.getDatabase(), "pvplist");
+                connection.execute(query, myCfg.getDatabase(), myCfg.getTablePrefix() + "pvplist");
 
             } catch (SQLException e) {
                 getLogger().warning("[MySQL]: " + e.getMessage());
@@ -164,7 +162,7 @@ public class PvPTogglePlugin extends JavaPlugin {
             } finally {
                 connection.close();
             }
-        }, "pvplist");
+        }, connection.getTablePrefix() + "pvplist");
     }
 
     private FileConfiguration preloadConfig(FileConfiguration config) {
@@ -174,7 +172,8 @@ public class PvPTogglePlugin extends JavaPlugin {
                 "Message.PvP_Usage",
                 "Message.PvP_Wrong_Command",
                 "Message.PvP_NoPerm",
-                "Message.PvP_Nobody"
+                "Message.PvP_Nobody",
+                "Message.PvP_Error"
         };
 
         for (String path : paths) {
