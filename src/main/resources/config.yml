@@ -1,8 +1,8 @@
 # protect pets | default: true
 Settings:
   Tamed_Pet_Protect: true
-  MySQL: false
   Debug: false
+
 # message | parameter: <player> <target> <pet> | color char: &
 Message:
   PvP_Toggle_ON: '&6Dein PvP Modus ist aktiviert!' #available: <player>
@@ -23,10 +23,17 @@ Message:
   PvP_Wrong_Command: '&cBefehl nicht erkannt!' #NoParameter
   PvP_NoPerm: '&cKeine Berechtigung!' #NoParameter
   PvP_Nobody: '&cNiemand!' #NoParameter
+  PvP_Error: '&cDein Befehl konnte nicht verarbeitet. Bitte versuchs erneut!' #NoParameter
+
+BlockedWorldList:
+ # - Spawn
+ # - Eventworld
+
 # MySQL | Need SELECT, INSERT, UPDATE, DELETE and CREATE permissions
 MySQL:
   Host: '127.0.0.1'
   Port: 3306
-  Database: 'database'
-  Username: 'username'
-  Password: 'password'
+  Database: 'yourDatabase'
+  TablePrefix: 'pt_'
+  Username: 'yourUsername'
+  Password: 'yourPassword'
