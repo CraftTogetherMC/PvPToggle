@@ -7,4 +7,8 @@ commands:
    pvp:
       description: toggle your pvp mode
    pvplist:
-      description: show a pvp list
+      description: show a pvplist
+   pvpstate:
+      description: show your pvp state
+   pvpdebug:
+      description: show intern infomations
