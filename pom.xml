@@ -4,17 +4,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.kaai</groupId>
+    <groupId>de.crafttogether</groupId>
     <artifactId>PvPToggle</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>PvPToggle</name>
 
-    <description>PvP management plugin</description>
+    <description>PvP Management Plugin</description>
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <testserver.pluginfolder>C:\Users\Kaai\IdeaProjects\PvPToggle\Minecraft Server\server1\plugins</testserver.pluginfolder>
+<!--        <testserver.pluginfolder>C:\Users\Joscha\Desktop\CT\Testumgebungen\Server\devserver\plugins\update</testserver.pluginfolder>-->
     </properties>
 
     <build>
@@ -25,8 +27,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>16</source>
+                    <target>16</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -64,6 +66,15 @@
                                     <type>${project.packaging}</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <destFileName>${project.name}.${project.packaging}</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>${project.packaging}</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${testserver.pluginfolder}</outputDirectory>
                                     <destFileName>${project.name}.${project.packaging}</destFileName>
                                 </artifactItem>
                             </artifactItems>
@@ -107,9 +118,21 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>2.7.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20190722</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.25</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
