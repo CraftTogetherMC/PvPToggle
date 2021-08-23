@@ -1,9 +1,13 @@
 package de.crafttogether.pvptoggle;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+import de.crafttogether.pvptoggle.commands.DebugCommand;
 import de.crafttogether.pvptoggle.commands.PvpCommand;
 import de.crafttogether.pvptoggle.commands.PvpListCommand;
+import de.crafttogether.pvptoggle.commands.PvpState;
 import de.crafttogether.pvptoggle.listener.OnPlayerAttacked;
-import de.crafttogether.pvptoggle.listener.OnPlayerJoinLeave;
+import de.crafttogether.pvptoggle.listener.OnPlayerJoin;
 import de.crafttogether.pvptoggle.listener.OnPluginMessageReceived;
 import de.crafttogether.pvptoggle.util.MySQLAdapter;
 import de.crafttogether.pvptoggle.util.MySQLAdapter.MySQLConfig;
@@ -14,14 +18,15 @@ import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /*
 	Dieses Plugin wurde von Kaai für CT enwtickelt.
@@ -31,29 +36,32 @@ public class PvPTogglePlugin extends JavaPlugin {
     private static PvPTogglePlugin plugin;
     private static FileConfiguration config;
     private static MySQLAdapter mySQL;
-    private static final ArrayList<UUID> pvpList = new ArrayList<>();
+    private static final HashMap<UUID, Boolean> pvplist = new HashMap<>();
 
     @Override
     public void onEnable() {
-
         Arrays.asList(
-                        "com.zaxxer.hikari.pool.PoolBase", "com.zaxxer.hikari.pool.HikariPool",
-                        "com.zaxxer.hikari.HikariDataSource", "com.zaxxer.hikari.HikariConfig",
+                        "com.zaxxer.hikari.pool.PoolBase",
+                        "com.zaxxer.hikari.pool.HikariPool",
+                        "com.zaxxer.hikari.HikariDataSource",
+                        "com.zaxxer.hikari.HikariConfig",
                         "com.zaxxer.hikari.util.DriverDataSource")
                 .forEach(s -> Logger.getLogger(s).setLevel(Level.OFF));
 
         plugin = this;
 
-        Objects.requireNonNull(getCommand("pvp")).setExecutor(new PvpCommand());
-        Objects.requireNonNull(getCommand("pvplist")).setExecutor(new PvpListCommand());
+        getCommand("pvp").setExecutor(new PvpCommand());
+        getCommand("pvplist").setExecutor(new PvpListCommand());
+        getCommand("pvpstate").setExecutor(new PvpState());
+        // THIS COMMAND WILL BE REMOVED
+        getCommand("pvpdebug").setExecutor(new DebugCommand());
 
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new OnPlayerAttacked(), this);
-        pluginManager.registerEvents(new OnPlayerJoinLeave(), this);
+        pluginManager.registerEvents(new OnPlayerJoin(), this);
 
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new OnPluginMessageReceived());
-
 
         getConfig();
         saveDefaultConfig();
@@ -83,34 +91,80 @@ public class PvPTogglePlugin extends JavaPlugin {
         myCfg.setPassword(config.getString("MySQL.Password"));
         myCfg.setDatabase(config.getString("MySQL.Database"));
 
-        if (!myCfg.checkInputs() || myCfg.getDatabase() == null) {
+        if ((!myCfg.checkInputs() || myCfg.getDatabase() == null) ||
+                (myCfg.getDatabase().equals("database") &&
+                myCfg.getUsername().equals("username") &&
+                myCfg.getPassword().equals("password") &&
+                myCfg.getPort() == 3306 &&
+                myCfg.getHost().equals("127.0.0.1"))) {
             getLogger().warning("[MySQL]: Invalid configuration! Please check your config.yml");
             getServer().getPluginManager().disablePlugin(this);
+        } else {
+            mySQL = new MySQLAdapter(myCfg);
+
+            if (getConfig().getBoolean("Settings.Debug"))
+                getLogger().info("[MySQL]: Create Tables ...");
+
+            MySQLConnection connection = mySQL.getConnection();
+            try {
+                String query = "CREATE TABLE IF NOT EXISTS `%s`.`%s` (" +
+                        "`id` INT(11) NOT NULL AUTO_INCREMENT, " +
+                        "`playername` VARCHAR(16) NOT NULL , " +
+                        "`uuid` VARCHAR(36) NOT NULL , " +
+                        "`pvpstate` BOOLEAN NULL DEFAULT NULL , " +
+                        "`timestamp` TIMESTAMP NOT NULL , " +
+                        "PRIMARY KEY (`id`), INDEX (`uuid`)) ENGINE = InnoDB;";
+
+                connection.execute(query, myCfg.getDatabase(), "pvplist");
+
+            } catch (SQLException e) {
+                getLogger().warning("[MySQL]: " + e.getMessage());
+            } finally {
+                connection.close();
+            }
+
+            if (getConfig().getBoolean("Settings.Debug"))
+                getLogger().info("[MySQL]: Select uuid, pvpstate ...");
+
+            updatePvplist();
         }
+    }
 
-        mySQL = new MySQLAdapter(myCfg);
-
-        if (getConfig().getBoolean("Settings.Debug"))
-            getLogger().info("[MySQL]: Create Tables ...");
-
-        MySQLConnection connection = mySQL.getConnection();
+    public void updateAllProxyCachesCommand(Player player) {
+        // update other bungeeCord connections caches
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF("Forward");
+        out.writeUTF("ALL");
+        out.writeUTF("pvptoggle");
+        ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+        DataOutputStream msgout = new DataOutputStream(msgbytes);
         try {
-            String query = "CREATE TABLE IF NOT EXISTS `" + myCfg.getDatabase() + "`.`pvplist` (" +
-                    "`id` INT(11) NOT NULL AUTO_INCREMENT, " +
-                    "`uuid` VARCHAR(36) NOT NULL, " +
-                    "`playername` VARCHAR(16) NOT NULL, " +
-                    "`pvp` BOOLEAN NULL DEFAULT NULL, " +
-                    "PRIMARY KEY (`id`), INDEX (`uuid`)) ENGINE = InnoDB;";
-
-            connection.execute(query);
-
-        } catch (SQLException ex) {
-            getLogger().warning("[MySQL]: " + ex.getMessage());
-        } catch (Throwable ex) {
-            getLogger().warning("[EX]: " + ex.getMessage());
-        } finally {
-            connection.close();
+            msgout.writeUTF("updateCache");
+            msgout.writeShort(123);
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
+        out.writeShort(msgbytes.toByteArray().length);
+        out.write(msgbytes.toByteArray());
+        player.sendPluginMessage(PvPTogglePlugin.getInstance(), "BungeeCord", out.toByteArray());
+    }
+
+    public void updatePvplist() {
+        MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
+        connection.queryAsync("SELECT `uuid`, `pvpstate` FROM `%s`", (err, result) -> {
+            if (err != null)
+                getLogger().warning("[MySQL]: " + err.getMessage());
+            try {
+                while (result.next()) {
+                    pvplist.put(UUID.fromString(result.getString("uuid")), result.getBoolean("pvpstate"));
+                }
+
+            } catch (SQLException e) {
+                PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
+            } finally {
+                connection.close();
+            }
+        }, "pvplist");
     }
 
     private FileConfiguration preloadConfig(FileConfiguration config) {
@@ -133,8 +187,14 @@ public class PvPTogglePlugin extends JavaPlugin {
         return config;
     }
 
-    public static ArrayList<UUID> getPvpList() {
-        return pvpList;
+    public static HashMap<UUID, Boolean> pvpList() {
+        return pvplist;
+    }
+
+    public static HashMap<UUID, Boolean> pvpList(UUID playeruuid, boolean state) {
+        if (!pvplist.containsKey(playeruuid)) pvplist.remove(playeruuid);
+        pvplist.put(playeruuid, state);
+        return pvplist;
     }
 
     public static PvPTogglePlugin getInstance() {
