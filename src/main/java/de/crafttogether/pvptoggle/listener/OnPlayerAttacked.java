@@ -4,6 +4,7 @@ import de.crafttogether.pvptoggle.PvPTogglePlugin;
 import de.crafttogether.pvptoggle.util.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -18,22 +19,31 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.potion.PotionEffect;
 
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class OnPlayerAttacked implements Listener {
 
-    FileConfiguration config = PvPTogglePlugin.getInstance().getConfig();
-
     @EventHandler
     public void onPlayerAttacked(EntityDamageByEntityEvent e) {
-        DamageCause cause = e.getCause();
         Entity damager = e.getDamager();
+
+        List<String> worlds = PvPTogglePlugin.getPreloadConfig().getStringList("BlockedWorldList");
+        if (!worlds.isEmpty()) {
+            String currentWorld = damager.getWorld().getName().toLowerCase(Locale.ROOT);
+            for (String world : worlds) {
+                if (world.toLowerCase(Locale.ROOT).equals(currentWorld)) {
+                    return;
+                }
+            }
+        }
+
+        DamageCause cause = e.getCause();
 
         //  Citizens check
         if (e.getEntity().hasMetadata("NPC"))
             return;
+
+        Configuration config = PvPTogglePlugin.getPreloadConfig();
 
         switch (cause) {
             case PROJECTILE -> {
@@ -125,7 +135,7 @@ public class OnPlayerAttacked implements Listener {
                     }
                     else if (entity instanceof Tameable pet) {
                         if (pet.getOwner() != null && pet.getOwner().getUniqueId() != attacking.getUniqueId()) {
-                            attacking.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Pet_Protect")), attacking.getName(), pet.getOwner().getName(), Util.translator(entity.getName())));
+                            attacking.sendMessage(Util.format(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Pet_Protect"), attacking.getName(), pet.getOwner().getName(), Util.translator(entity.getName())));
                             e.setCancelled(true);
                         }
                     }
@@ -138,6 +148,8 @@ public class OnPlayerAttacked implements Listener {
     private boolean petProtectCheck(EntityType entityType, Tameable pet, Player attacking) {
         if (pet.getOwner() == null || pet.getOwner().getUniqueId() == attacking.getUniqueId())
             return false;
+
+        Configuration config = PvPTogglePlugin.getPreloadConfig();
         if (entityType == EntityType.WOLF) {
             if (pet.getOwner() != null) {
                 Player player = Bukkit.getPlayer(pet.getOwner().getUniqueId());
@@ -165,6 +177,7 @@ public class OnPlayerAttacked implements Listener {
         if (!pvplist.containsKey(player.getUniqueId()) || !pvplist.containsKey(attacking.getUniqueId()))
             return true;
 
+        Configuration config = PvPTogglePlugin.getPreloadConfig();
 
         if (!pvplist.get(player.getUniqueId()) && !pvplist.get(attacking.getUniqueId())) {
             attacking.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), attacking.getName(), player.getName()));
