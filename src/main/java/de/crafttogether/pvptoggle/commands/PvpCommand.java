@@ -1,6 +1,7 @@
 package de.crafttogether.pvptoggle.commands;
 
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
+import de.crafttogether.pvptoggle.util.MySQLAdapter;
 import de.crafttogether.pvptoggle.util.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -24,102 +25,117 @@ public class PvpCommand implements TabExecutor {
 
         if (sender instanceof Player player) {
             UUID playerUUID = player.getUniqueId();
+            if (!PvPTogglePlugin.pvpList().containsKey(playerUUID)) {
+                PvPTogglePlugin.getInstance().updatePvplist();
+                player.sendMessage("Du warst gar nicht im cache drin. Ich trag dich ein");
+                return false;
+            }
 
             if (args.length == 0) {
                 if (!sender.hasPermission("pvptoggle.pvp.toggle")) {
-                    sender.sendMessage(Objects.requireNonNull(config.getString("Message.PvP_NoPerm")));
+                    sender.sendMessage(config.getString("Message.PvP_NoPerm"));
                     return false;
                 }
-                if (!PvPTogglePlugin.getPvpList().contains(playerUUID)) {
+                if (!PvPTogglePlugin.pvpList().get(playerUUID)) {
                     add(plugin, player);
 
-                    player.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_ON")), player.getName()));
+                    player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_ON"), player.getName()));
                 } else {
                     remove(plugin, player);
 
-                    player.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_OFF")), player.getName()));
+                    player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_OFF"), player.getName()));
                 }
             } else if (args.length == 1) {
+                if (!sender.hasPermission("pvptoggle.pvp.toggle")) {
+                    sender.sendMessage(config.getString("Message.PvP_NoPerm"));
+                    return false;
+                }
                 if (sender.hasPermission("pvptoggle.pvp.other")) {
                     Player target = Bukkit.getPlayer(args[0]);
                     if (target != null) {
                         UUID targetUUID = target.getUniqueId();
 
-                        if (!PvPTogglePlugin.getPvpList().contains(targetUUID)) {
+                        if (!PvPTogglePlugin.pvpList().get(targetUUID)) {
                             add(plugin, target);
-
-                            player.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_Other_ON")), player.getName(), target.getName()));
-
+                            player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_ON"), player.getName(), target.getName()));
                             if (player.getUniqueId() != target.getUniqueId())
-                                target.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_Other_ON_Target")), player.getName(), target.getName()));
+                                target.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_ON_Target"), player.getName(), target.getName()));
 
                         } else {
                             remove(plugin, target);
                             if (player.getUniqueId() != target.getUniqueId())
-                                target.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_Other_OFF_Target")), player.getName(), target.getName()));
+                                target.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_OFF_Target"), player.getName(), target.getName()));
 
-                            player.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_Other_OFF")), player.getName(), target.getName()));
-
+                            player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_OFF"), player.getName(), target.getName()));
                         }
                     } else
-                        player.sendMessage(Objects.requireNonNull(config.getString("Message.PvP_NotFound")));
+                        player.sendMessage(config.getString("Message.PvP_NotFound"));
                 } else
                     sender.sendMessage(Objects.requireNonNull(config.getString("Message.PvP_NoPerm")));
             } else if (sender.hasPermission("pvptoggle.pvp.other")) {
                 if (args.length == 2) {
                     Player target = Bukkit.getPlayer(args[0]);
 
-                    if (target != null) {
-                        if (args[1].equalsIgnoreCase("true")) {
-                            add(plugin, target);
-
-                            if (target.getUniqueId() != player.getUniqueId())
-                                target.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_Other_ON_Target")), player.getName(), target.getName()));
-
-                            player.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_Other_ON")), player.getName(), target.getName()));
-                        } else if (args[1].equalsIgnoreCase("false")) {
-                            remove(plugin, target);
-
-                            if (target.getUniqueId() != player.getUniqueId())
-                                target.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_Other_OFF_Target")), player.getName(), target.getName()));
-
-                            player.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_Other_OFF")), player.getName(), target.getName()));
-                        } else
-                            player.sendMessage(Util.format("Message.PvP_Usage"));
-                    } else {
+                    if (target == null) {
                         player.sendMessage(Util.format(config.getString("Message.PvP_NotFound")));
+                        return false;
                     }
+                    if (args[1].equalsIgnoreCase("true")) {
+                        if (!PvPTogglePlugin.pvpList().get(target.getUniqueId())) {
+                            add(plugin, target);
+                            if (target.getUniqueId() != player.getUniqueId())
+                                target.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_ON_Target"), player.getName(), target.getName()));
+                        }
+                        player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_ON"), player.getName(), target.getName()));
+                    } else if (args[1].equalsIgnoreCase("false")) {
+                        if (PvPTogglePlugin.pvpList().get(target.getUniqueId())) {
+                            remove(plugin, target);
+                            if (target.getUniqueId() != player.getUniqueId())
+                                target.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_OFF_Target"), player.getName(), target.getName()));
+                        }
+                        player.sendMessage(Util.format(config.getString("Message.PvP_Toggle_Other_OFF"), player.getName(), target.getName()));
+                    } else
+                        player.sendMessage(config.getString("Message.PvP_Usage"));
                 } else
-                    sender.sendMessage(Util.format("Message.PvP_Wrong_Command"));
+                    sender.sendMessage(config.getString("Message.PvP_Wrong_Command"));
             } else
-                sender.sendMessage(Util.format(config.getString("Message.PvP_NoPerm")));
+                sender.sendMessage(config.getString("Message.PvP_NoPerm"));
         }
 
         return false;
     }
 
     private void remove(PvPTogglePlugin plugin, Player player) {
-        PvPTogglePlugin.getPvpList().remove(player.getUniqueId());
+        PvPTogglePlugin.pvpList(player.getUniqueId(), false);
 
         if (plugin.getConfig().getBoolean("Settings.Debug"))
             plugin.getLogger().info("[MySQL]: Updating pvp-state of player '" + player.getName() + "' to 0 (disabled) ...");
 
-        PvPTogglePlugin.getMySQL().getConnection().updateAsync("UPDATE `?`.`?` SET `pvp` = '0' WHERE `?`.`uuid` = '?'", (err, affectedRows) -> {
+        MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
+
+        connection.updateAsync("UPDATE %s SET `pvpstate` = '0' WHERE `uuid` = '%s'", (err, affectedRows) -> {
             if (err != null)
                 plugin.getLogger().warning("[MySQL]: " + err.getMessage());
-        }, PvPTogglePlugin.getMySQL().getConfig().getDatabase(), "pvplist", player.getUniqueId()).close();
+            plugin.updateAllProxyCachesCommand(player);
+            connection.close();
+        }, "pvplist", player.getUniqueId());
+
     }
 
     private void add(PvPTogglePlugin plugin, Player player) {
-        PvPTogglePlugin.getPvpList().add(player.getUniqueId());
+        PvPTogglePlugin.pvpList(player.getUniqueId(), true);
 
         if (plugin.getConfig().getBoolean("Settings.Debug"))
             plugin.getLogger().info("[MySQL]: Updating pvp-state of player '" + player.getName() + "' to 1 (enabled) ...");
 
-        PvPTogglePlugin.getMySQL().getConnection().updateAsync("UPDATE `?`.`?` SET `pvp` = '1' WHERE `?`.`uuid` = '?'", (err, affectedRows) -> {
+        MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
+        connection.updateAsync("UPDATE %s SET `pvpstate` = '1' WHERE `uuid` = '%s'", (err, affectedRows) -> {
             if (err != null)
                 plugin.getLogger().warning("[MySQL]: " + err.getMessage());
-        }, PvPTogglePlugin.getMySQL().getConfig().getDatabase(), "pvplist", player.getUniqueId()).close();
+            plugin.updateAllProxyCachesCommand(player);
+            connection.close();
+        }, "pvplist", player.getUniqueId());
+
     }
 
 
