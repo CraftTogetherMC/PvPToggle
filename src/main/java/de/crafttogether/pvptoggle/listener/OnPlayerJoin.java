@@ -33,15 +33,15 @@ public class OnPlayerJoin implements Listener {
 
                 try {
                     if (!result.next())
-                        connection.update("INSERT INTO `%s`.`%s` (`id`, `playername`, `uuid`, `pvpstate`, `timestamp`) VALUES (NULL, '%s', '%s', '0', current_timestamp())",
-                                PvPTogglePlugin.getPreloadConfig().getString("MySQL.Database"), "pvplist",  player.getName(), player.getUniqueId());
+                        connection.update("INSERT INTO `%s`.`%s` (`id`, `playername`, `uuid`, `pvpstate`) VALUES (NULL, '%s', '%s', '0')",
+                                PvPTogglePlugin.getPreloadConfig().getString("MySQL.Database"), connection.getTablePrefix() + "pvplist",  player.getName(), player.getUniqueId());
 
                 } catch (SQLException ex) {
                     PvPTogglePlugin.getInstance().getLogger().warning(ex.getMessage());
                 }
                 connection.close();
 
-            }, PvPTogglePlugin.getPreloadConfig().getString("MySQL.Database"), "pvplist",player.getUniqueId());
+            }, PvPTogglePlugin.getPreloadConfig().getString("MySQL.Database"), connection.getTablePrefix() + "pvplist", player.getUniqueId());
 
             PvPTogglePlugin.pvpList().put(player.getUniqueId(), false);
         }
