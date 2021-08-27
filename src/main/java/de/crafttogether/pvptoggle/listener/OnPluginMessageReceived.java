@@ -32,50 +32,52 @@ public class OnPluginMessageReceived implements PluginMessageListener {
         String subchannel = in.readUTF();
         if (subchannel.equals("PlayerList")) { // from PvpListCommand
             String server = in.readUTF();
-            String[] playerList = in.readUTF().split(", ");
+            if (server.equals("ALL")) {
+                String[] playerList = in.readUTF().split(", ");
 
-            Plugin plugin = PvPTogglePlugin.getInstance();
+                Plugin plugin = PvPTogglePlugin.getInstance();
 
-            if (plugin.getConfig().getBoolean("Settings.Debug"))
-                plugin.getLogger().info("[MySQL]: Select all playernames where pvpstate = 1 ...");
+                if (plugin.getConfig().getBoolean("Settings.Debug"))
+                    plugin.getLogger().info("[MySQL]: Select all playernames where pvpstate = 1 ...");
 
-            MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
+                MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
 
-            connection.queryAsync("SELECT `playername` FROM `%s` WHERE `pvpstate` = '1'", (err, result) -> {
-                if (err != null)
-                    plugin.getLogger().warning("[MySQL]: " + err.getMessage());
+                connection.queryAsync("SELECT `playername` FROM `%s` WHERE `pvpstate` = '1'", (err, result) -> {
+                    if (err != null)
+                        plugin.getLogger().warning("[MySQL]: " + err.getMessage());
 
-                try {
-                    List<String> pvplist = new ArrayList<>();
-                    while (result.next()) {
-                        pvplist.add(result.getString("playername"));
-                    }
-                    player.sendMessage(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_List"));
-
-                    List<String> finalPvpList = new ArrayList<>();
-
-                    if (!pvplist.isEmpty()) {
-                        for (String pvplistPlayer : pvplist) {
-                            for (String onlinePlayer : playerList) {
-                                if (pvplistPlayer.equals(onlinePlayer))
-                                    finalPvpList.add(pvplistPlayer);
-                            }
+                    try {
+                        List<String> pvplist = new ArrayList<>();
+                        while (result.next()) {
+                            pvplist.add(result.getString("playername"));
                         }
-                        if (!finalPvpList.isEmpty()) {
-                            for (String s : finalPvpList) {
-                                player.sendMessage("§8-§c " + s);
+                        player.sendMessage(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_List"));
+
+                        List<String> finalPvpList = new ArrayList<>();
+
+                        if (!pvplist.isEmpty()) {
+                            for (String pvplistPlayer : pvplist) {
+                                for (String onlinePlayer : playerList) {
+                                    if (pvplistPlayer.equals(onlinePlayer))
+                                        finalPvpList.add(pvplistPlayer);
+                                }
+                            }
+                            if (!finalPvpList.isEmpty()) {
+                                for (String s : finalPvpList) {
+                                    player.sendMessage("§8-§c " + s);
+                                }
+                            } else {
+                                player.sendMessage(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Nobody"));
                             }
                         } else {
                             player.sendMessage(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Nobody"));
                         }
-                    } else {
-                        player.sendMessage(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Nobody"));
+                    } catch (SQLException e) {
+                        PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
                     }
-                } catch (SQLException e) {
-                    PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
-                }
-                connection.close();
-            }, connection.getTablePrefix() + "pvplist");
+                    connection.close();
+                }, connection.getTablePrefix() + "pvplist");
+            }
         }
         else if (subchannel.equals("pvptoggle")) {
             short len = in.readShort();
