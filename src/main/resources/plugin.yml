@@ -1,10 +1,12 @@
 name: PvPToggle
-version: 1.0
-api-version: 1.13
-main: de.kaai.pvptoggle.PvPTogglePlugin
+version: 1.1
+api-version: 1.17
+main: de.crafttogether.pvptoggle.PvPTogglePlugin
 
 commands:
    pvp:
-      description: toggle pvp
+      description: toggle your pvp mode
    pvplist:
-      description: show pvp list
+      description: show a pvplist
+   pvpstate:
+      description: show your pvp state
