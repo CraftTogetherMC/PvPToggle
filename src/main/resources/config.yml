@@ -37,3 +37,6 @@ MySQL:
   TablePrefix: 'pt_'
   Username: 'yourUsername'
   Password: 'yourPassword'
+
+BungeeCord:
+  Enable: false
