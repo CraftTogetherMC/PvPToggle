@@ -3,6 +3,8 @@ package de.crafttogether.pvptoggle.commands;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
+import de.crafttogether.pvptoggle.util.Util;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -11,8 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class PvpListCommand implements TabExecutor {
 
@@ -28,10 +29,21 @@ public class PvpListCommand implements TabExecutor {
                 return false;
             }
 
-            ByteArrayDataOutput out = ByteStreams.newDataOutput();
-            out.writeUTF("PlayerList");
-            out.writeUTF("ALL");
-            player.sendPluginMessage(PvPTogglePlugin.getInstance(), "BungeeCord", out.toByteArray());
+            if (config.getBoolean("BungeeCord.Enable")) {
+                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                out.writeUTF("PlayerList");
+                out.writeUTF("ALL");
+                player.sendPluginMessage(PvPTogglePlugin.getInstance(), "BungeeCord", out.toByteArray());
+            } else {
+
+                ArrayList<String> names = new ArrayList<>();
+
+                for (Player current : Bukkit.getOnlinePlayers()) {
+                    names.add(current.getName());
+                }
+
+                Util.sendPvplistFromDatabaseToPlayer(player, names);
+            }
 
         }
         return false;
@@ -43,4 +55,5 @@ public class PvpListCommand implements TabExecutor {
     public List<String> onTabComplete(@NotNull CommandSender arg0, @NotNull Command arg1, @NotNull String arg2, String[] arg3) {
         return new ArrayList<>();
     }
+
 }

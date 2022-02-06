@@ -116,7 +116,8 @@ public class PvpCommand implements TabExecutor {
         connection.updateAsync("UPDATE %s SET `pvpstate` = '0' WHERE `uuid` = '%s'", (err, affectedRows) -> {
             if (err != null)
                 plugin.getLogger().warning("[MySQL]: " + err.getMessage());
-            plugin.updateAllProxyCachesCommand(player);
+            if (PvPTogglePlugin.getPreloadConfig().getBoolean("BungeeCord.Enable"))
+                plugin.updateAllProxyCachesCommand(player);
             connection.close();
         }, connection.getTablePrefix() + "pvplist", player.getUniqueId());
 
@@ -132,7 +133,8 @@ public class PvpCommand implements TabExecutor {
         connection.updateAsync("UPDATE %s SET `pvpstate` = '1' WHERE `uuid` = '%s'", (err, affectedRows) -> {
             if (err != null)
                 plugin.getLogger().warning("[MySQL]: " + err.getMessage());
-            plugin.updateAllProxyCachesCommand(player);
+            if (PvPTogglePlugin.getPreloadConfig().getBoolean("BungeeCord.Enable"))
+                plugin.updateAllProxyCachesCommand(player);
             connection.close();
         }, connection.getTablePrefix() + "pvplist", player.getUniqueId());
 

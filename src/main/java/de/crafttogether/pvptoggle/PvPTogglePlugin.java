@@ -57,20 +57,24 @@ public class PvPTogglePlugin extends JavaPlugin {
         pluginManager.registerEvents(new OnPlayerAttacked(), this);
         pluginManager.registerEvents(new OnPlayerJoin(), this);
 
-        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new OnPluginMessageReceived());
-
         getConfig();
         saveDefaultConfig();
         config = preloadConfig(getConfig());
+
+        if (config.getBoolean("BungeeCord.Enable")) {
+            getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+            getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new OnPluginMessageReceived());
+        }
 
         setupMySql(config);
     }
 
     @Override
     public void onDisable() {
-        getServer().getMessenger().unregisterOutgoingPluginChannel(this);
-        getServer().getMessenger().unregisterIncomingPluginChannel(this);
+        if (config.getBoolean("BungeeCord.Enable")) {
+            getServer().getMessenger().unregisterOutgoingPluginChannel(this);
+            getServer().getMessenger().unregisterIncomingPluginChannel(this);
+        }
 
         if (mySQL != null)
             mySQL.disconnect();
@@ -111,6 +115,7 @@ public class PvPTogglePlugin extends JavaPlugin {
                         "`playername` VARCHAR(16) NOT NULL , " +
                         "`uuid` VARCHAR(36) NOT NULL , " +
                         "`pvpstate` BOOLEAN NULL DEFAULT NULL , " +
+                        //"`cooldownTimestamp` INT(11) NULL DEFAULT NULL , " +
                         "PRIMARY KEY (`id`), INDEX (`uuid`)) ENGINE = InnoDB;";
 
                 connection.execute(query, myCfg.getDatabase(), myCfg.getTablePrefix() + "pvplist");
