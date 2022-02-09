@@ -61,20 +61,16 @@ public class PvPTogglePlugin extends JavaPlugin {
         saveDefaultConfig();
         config = preloadConfig(getConfig());
 
-        if (config.getBoolean("BungeeCord.Enable")) {
-            getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-            getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new OnPluginMessageReceived());
-        }
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new OnPluginMessageReceived());
 
         setupMySql(config);
     }
 
     @Override
     public void onDisable() {
-        if (config.getBoolean("BungeeCord.Enable")) {
-            getServer().getMessenger().unregisterOutgoingPluginChannel(this);
-            getServer().getMessenger().unregisterIncomingPluginChannel(this);
-        }
+        getServer().getMessenger().unregisterOutgoingPluginChannel(this);
+        getServer().getMessenger().unregisterIncomingPluginChannel(this);
 
         if (mySQL != null)
             mySQL.disconnect();
@@ -134,6 +130,9 @@ public class PvPTogglePlugin extends JavaPlugin {
     }
 
     public void updateAllProxyCachesCommand(Player player) {
+        if (!PvPTogglePlugin.getPreloadConfig().getBoolean("BungeeCord.Enable"))
+            return;
+
         // update other bungeeCord connections caches
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Forward");
