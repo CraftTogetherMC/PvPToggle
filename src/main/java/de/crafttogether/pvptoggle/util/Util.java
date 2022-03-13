@@ -41,10 +41,6 @@ public class Util {
     }
 
     public static String format(String message, String playerName, long cooldownTimeMillis) {
-
-
-        String cooldown;
-
         String a = message.replace("<player>", playerName);
         String b = a.replace("<cooldown>", formatCooldown(cooldownTimeMillis));
         return ChatColor.translateAlternateColorCodes('&', b);
