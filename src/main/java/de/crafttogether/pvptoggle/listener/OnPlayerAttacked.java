@@ -179,6 +179,10 @@ public class OnPlayerAttacked implements Listener {
 
         Configuration config = PvPTogglePlugin.getPreloadConfig();
 
+        if (player == attacking) {
+            return false;
+        }
+
         if (!pvplist.get(player.getUniqueId()) && !pvplist.get(attacking.getUniqueId())) {
             attacking.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), attacking.getName(), player.getName()));
             return true;
