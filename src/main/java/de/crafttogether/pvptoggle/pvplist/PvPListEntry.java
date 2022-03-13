@@ -1,7 +1,5 @@
 package de.crafttogether.pvptoggle.pvplist;
 
-import org.bukkit.entity.Player;
-
 import java.util.UUID;
 
 
@@ -23,12 +21,11 @@ class PvPListEntry {
         this.timestamp = 0;
     }
 
-    public PvPListEntry(UUID playerUuid, boolean state, long timestamp) {
+    protected PvPListEntry(UUID playerUuid, boolean state, long timestamp) {
         this.playerUuid = playerUuid;
         this.state = state;
         this.timestamp = timestamp;
     }
-
 
     protected boolean state(boolean state) {
         return this.state = state;
