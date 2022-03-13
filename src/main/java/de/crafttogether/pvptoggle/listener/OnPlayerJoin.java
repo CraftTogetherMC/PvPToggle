@@ -22,15 +22,16 @@ public class OnPlayerJoin implements Listener {
     @EventHandler
     public void joinPlayer(PlayerJoinEvent e) {
         Player player = e.getPlayer();
-        if (!PvPTogglePlugin.getInstance().pvplist.equalsPlayerUuid(player.getUniqueId())) {
+        PvPTogglePlugin plugin = PvPTogglePlugin.getInstance();
+        if (!plugin.pvplist.equalsPlayerUuid(player.getUniqueId())) {
 
             MySQLAdapter.MySQLConnection connection = MySQLAdapter.getAdapter().getConnection();
             connection.queryAsync("SELECT `uuid` FROM `%s`.`%s` WHERE `uuid` = '%s'", (err, result) -> {
                 if (err != null) {
-                    PvPTogglePlugin.getInstance().getLogger().warning("[MySQL]: " + err.getMessage());
+                    plugin.getLogger().warning("[MySQL]: " + err.getMessage());
                 }
 
-                PvPTogglePlugin.getInstance().updateAllProxyCachesCommand(player);
+                plugin.updateAllProxyCachesCommand(player);
 
                 try {
                     if (!result.next())
@@ -38,16 +39,13 @@ public class OnPlayerJoin implements Listener {
                                 PvPTogglePlugin.getPreloadConfig().getString("MySQL.Database"), connection.getTablePrefix() + "pvplist",  player.getName(), player.getUniqueId());
 
                 } catch (SQLException ex) {
-                    PvPTogglePlugin.getInstance().getLogger().warning(ex.getMessage());
+                    plugin.getLogger().warning(ex.getMessage());
                 }
                 connection.close();
 
             }, PvPTogglePlugin.getPreloadConfig().getString("MySQL.Database"), connection.getTablePrefix() + "pvplist", player.getUniqueId());
 
-            PvPTogglePlugin.getInstance().pvplist.add(player.getUniqueId());
+            plugin.pvplist.add(player.getUniqueId());
         }
-
-
-
     }
 }
