@@ -3,7 +3,7 @@ package de.crafttogether.pvptoggle.listener;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
-import de.crafttogether.pvptoggle.util.Util;
+import de.crafttogether.pvptoggle.pvplist.PvPListSQL;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -27,7 +27,7 @@ public class OnPluginMessageReceived implements PluginMessageListener {
             if (server.equals("ALL")) {
                 String[] playerList = in.readUTF().split(", ");
 
-                Util.sendPvplistFromDatabaseToPlayer(player, Arrays.stream(playerList).toList());
+                PvPListSQL.sendPvplistFromDatabaseToPvPList(player, Arrays.stream(playerList).toList());
             }
         }
         else if (subchannel.equals("pvptoggle")) {

@@ -3,7 +3,7 @@ package de.crafttogether.pvptoggle.commands;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
-import de.crafttogether.pvptoggle.util.Util;
+import de.crafttogether.pvptoggle.pvplist.PvPListSQL;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -42,7 +42,7 @@ public class PvpListCommand implements TabExecutor {
                     names.add(current.getName());
                 }
 
-                Util.sendPvplistFromDatabaseToPlayer(player, names);
+                PvPListSQL.sendPvplistFromDatabaseToPvPList(player, names);
             }
 
         }
