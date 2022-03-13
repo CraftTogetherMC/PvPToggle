@@ -1,6 +1,7 @@
 package de.crafttogether.pvptoggle.commands;
 
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
+import de.crafttogether.pvptoggle.pvplist.PvPList;
 import de.crafttogether.pvptoggle.util.Util;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -24,11 +25,11 @@ public class PvpState implements TabExecutor {
                 return false;
             }
 
-            HashMap<UUID, Boolean> pvplist = PvPTogglePlugin.pvpList();
+            PvPList pvplist = PvPTogglePlugin.getInstance().pvplist;
 
-            if (pvplist.containsKey(player.getUniqueId())) {
+            if (pvplist.equalsPlayerUuid(player.getUniqueId())) {
                 Configuration config = PvPTogglePlugin.getPreloadConfig();
-                if (pvplist.get(player.getUniqueId()))
+                if (pvplist.state(player.getUniqueId()))
                     sender.sendMessage(Util.format(config.getString("Message.PvP_State_ON"), player.getName()));
                 else
                     sender.sendMessage(Util.format(config.getString("Message.PvP_State_OFF"), player.getName()));

@@ -22,7 +22,8 @@ public class OnPlayerJoin implements Listener {
     @EventHandler
     public void joinPlayer(PlayerJoinEvent e) {
         Player player = e.getPlayer();
-        if (!PvPTogglePlugin.pvpList().containsKey(player.getUniqueId())) {
+        if (!PvPTogglePlugin.getInstance().pvplist.equalsPlayerUuid(player.getUniqueId())) {
+
             MySQLAdapter.MySQLConnection connection = MySQLAdapter.getAdapter().getConnection();
             connection.queryAsync("SELECT `uuid` FROM `%s`.`%s` WHERE `uuid` = '%s'", (err, result) -> {
                 if (err != null) {
@@ -43,7 +44,7 @@ public class OnPlayerJoin implements Listener {
 
             }, PvPTogglePlugin.getPreloadConfig().getString("MySQL.Database"), connection.getTablePrefix() + "pvplist", player.getUniqueId());
 
-            PvPTogglePlugin.pvpList().put(player.getUniqueId(), false);
+            PvPTogglePlugin.getInstance().pvplist.add(player.getUniqueId());
         }
 
 
