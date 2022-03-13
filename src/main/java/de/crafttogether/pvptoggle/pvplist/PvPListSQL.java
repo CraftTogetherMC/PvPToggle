@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class PvPListSQL {
 
@@ -29,7 +30,7 @@ public class PvPListSQL {
                 while (result.next()) {
                     pvplist.add(result.getString("playername"));
                 }
-                player.sendMessage(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_List"));
+                player.sendMessage(Objects.requireNonNull(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_List")));
 
                 List<String> finalPvpList = new ArrayList<>();
 
@@ -45,10 +46,10 @@ public class PvPListSQL {
                             player.sendMessage("§8-§c " + s);
                         }
                     } else {
-                        player.sendMessage(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Nobody"));
+                        player.sendMessage(Objects.requireNonNull(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Nobody")));
                     }
                 } else {
-                    player.sendMessage(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Nobody"));
+                    player.sendMessage(Objects.requireNonNull(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Nobody")));
                 }
             } catch (SQLException e) {
                 PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
