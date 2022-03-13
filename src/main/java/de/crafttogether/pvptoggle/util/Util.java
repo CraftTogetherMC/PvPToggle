@@ -1,14 +1,6 @@
 package de.crafttogether.pvptoggle.util;
 
-import de.crafttogether.pvptoggle.PvPTogglePlugin;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
-
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Util {
 
@@ -48,48 +40,31 @@ public class Util {
         };
     }
 
-    public static void sendPvplistFromDatabaseToPlayer(@NotNull Player player, List<String> playerList) {
-        Plugin plugin = PvPTogglePlugin.getInstance();
+    public static String format(String message, String playerName, long cooldownTimeMillis) {
 
-        if (plugin.getConfig().getBoolean("Settings.Debug"))
-            plugin.getLogger().info("[MySQL]: Select all playernames where pvpstate = 1 ...");
 
-        MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
+        String cooldown;
 
-        connection.queryAsync("SELECT `playername` FROM `%s` WHERE `pvpstate` = '1'", (err, result) -> {
-            if (err != null)
-                plugin.getLogger().warning("[MySQL]: " + err.getMessage());
-
-            try {
-                List<String> pvplist = new ArrayList<>();
-                while (result.next()) {
-                    pvplist.add(result.getString("playername"));
-                }
-                player.sendMessage(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_List"));
-
-                List<String> finalPvpList = new ArrayList<>();
-
-                if (!pvplist.isEmpty()) {
-                    for (String pvplistPlayer : pvplist) {
-                        for (String onlinePlayer : playerList) {
-                            if (pvplistPlayer.equals(onlinePlayer))
-                                finalPvpList.add(pvplistPlayer);
-                        }
-                    }
-                    if (!finalPvpList.isEmpty()) {
-                        for (String s : finalPvpList) {
-                            player.sendMessage("§8-§c " + s);
-                        }
-                    } else {
-                        player.sendMessage(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Nobody"));
-                    }
-                } else {
-                    player.sendMessage(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Nobody"));
-                }
-            } catch (SQLException e) {
-                PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
-            }
-            connection.close();
-        }, connection.getTablePrefix() + "pvplist");
+        String a = message.replace("<player>", playerName);
+        String b = a.replace("<cooldown>", formatCooldown(cooldownTimeMillis));
+        return ChatColor.translateAlternateColorCodes('&', b);
     }
+
+    private static String formatCooldown(long CooldownMilli) {
+        long CooldownSec = CooldownMilli/1000;
+
+        if (CooldownSec <= 1) {
+            return "1 Sekunde";
+        } else if (CooldownSec <= 59) {
+            return CooldownSec + " Sekunden";
+        } else if (CooldownSec <= 60+59) {
+            return "1 Minute";
+        } else if (CooldownSec <= 60*59+59) {
+            return CooldownSec/60 + " Minuten";
+        } else if (CooldownSec <= 60*60+60*59+59) {
+            return "1 Stunde";
+        }
+        return CooldownSec/60/60 + " Stunden";
+    }
+
 }
