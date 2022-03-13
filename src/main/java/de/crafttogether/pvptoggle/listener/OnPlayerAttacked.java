@@ -179,6 +179,10 @@ public class OnPlayerAttacked implements Listener {
     private boolean pvplistCheck(Player player, Player attacking) {
         PvPList pvplist = PvPTogglePlugin.getInstance().pvplist;
 
+        if (player == attacking) {
+            return false;
+        }
+
         if (!pvplist.equalsPlayerUuid(player.getUniqueId()) || !pvplist.equalsPlayerUuid(attacking.getUniqueId()))
             return true;
 
