@@ -50,7 +50,7 @@ public class OnPlayerAttacked implements Listener {
                 Projectile projectile = (Projectile) e.getDamager();
                 projectile.getShooter();
                 if (projectile.getType() != EntityType.SNOWBALL && projectile.getType() != EntityType.ENDER_PEARL && projectile.getType() != EntityType.EGG) {
-                    if (projectile.getShooter() instanceof Player att && e.getEntity() instanceof Player pl) {
+                    if (projectile.getShooter() instanceof Player att && e.getEntity() instanceof Player pl && att != pl) {
                         e.setCancelled(pvplistCheck(pl, att));
                     }
                 }
@@ -195,4 +195,6 @@ public class OnPlayerAttacked implements Listener {
         }
         return false;
     }
+
+
 }
