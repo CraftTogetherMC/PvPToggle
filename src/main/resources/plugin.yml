@@ -1,5 +1,5 @@
 name: PvPToggle
-version: 1.1
+version: 1.2
 api-version: 1.17
 main: de.crafttogether.pvptoggle.PvPTogglePlugin
 
@@ -7,6 +7,6 @@ commands:
    pvp:
       description: toggle your pvp mode
    pvplist:
-      description: show a pvplist
+      description: shows the pvplist
    pvpstate:
-      description: show your pvp state
+      description: shows your pvp state
