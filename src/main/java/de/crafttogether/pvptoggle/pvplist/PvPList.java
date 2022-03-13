@@ -2,32 +2,28 @@ package de.crafttogether.pvptoggle.pvplist;
 
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
 import de.crafttogether.pvptoggle.util.MySQLAdapter;
-import de.crafttogether.pvptoggle.util.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class PvPList {
 
-    private final ArrayList<PvPListEntry> pvplistEntrys = new ArrayList<PvPListEntry>();
+    private final ArrayList<PvPListEntry> pvplistEntries = new ArrayList<>();
 
 
     public void add(UUID playerUuid) {
-        pvplistEntrys.add(new PvPListEntry(playerUuid));
+        pvplistEntries.add(new PvPListEntry(playerUuid));
     }
 
     public void add(UUID playerUuid, boolean state) {
-        pvplistEntrys.add(new PvPListEntry(playerUuid, state));
+        pvplistEntries.add(new PvPListEntry(playerUuid, state));
     }
 
     public void add(UUID playerUuid, boolean state, long timestamp) {
-        pvplistEntrys.add(new PvPListEntry(playerUuid, state, timestamp));
+        pvplistEntries.add(new PvPListEntry(playerUuid, state, timestamp));
     }
 
     public long checkTimestamp(UUID playerUuid) {
@@ -36,8 +32,8 @@ public class PvPList {
         long timestampNow = System.currentTimeMillis();
         int cooldownMillis = PvPTogglePlugin.getInstance().getConfig().getInt("Settings.Cooldown_Time")*1000;
 
-        for (PvPListEntry pvPListEntry : pvplistEntrys) {
-            if (playerUuid == pvPListEntry.playerUuid()) {
+        for (PvPListEntry pvPListEntry : pvplistEntries) {
+            if (pvPListEntry.playerUuid().equals(playerUuid)) {
                 long differenz = timestampNow - pvPListEntry.timestamp();
                 long left = cooldownMillis - differenz;
 
@@ -121,8 +117,8 @@ public class PvPList {
 
     public boolean toggleState(UUID playerUuid) {
 
-        for (PvPListEntry pvPListEntry : pvplistEntrys) {
-            if (playerUuid == pvPListEntry.playerUuid()) {
+        for (PvPListEntry pvPListEntry : pvplistEntries) {
+            if (pvPListEntry.playerUuid().equals(playerUuid)) {
                 Player player = Bukkit.getPlayer(playerUuid);
                 boolean state = pvPListEntry.state(!pvPListEntry.state());
                 if (state)
@@ -136,8 +132,8 @@ public class PvPList {
     }
 
     public boolean state(UUID playerUuid, boolean state) {
-        for (PvPListEntry pvPListEntry : pvplistEntrys) {
-            if (playerUuid == pvPListEntry.playerUuid()) {
+        for (PvPListEntry pvPListEntry : pvplistEntries) {
+            if (pvPListEntry.playerUuid().equals(playerUuid)) {
                 Player player = Bukkit.getPlayer(playerUuid);
                 if (state)
                     updateTimestamp(player);
@@ -153,8 +149,8 @@ public class PvPList {
     public boolean state(UUID playerUuid) {
         boolean state = false;
 
-        for (PvPListEntry pvPListEntry : pvplistEntrys) {
-            if (playerUuid == pvPListEntry.playerUuid()) {
+        for (PvPListEntry pvPListEntry : pvplistEntries) {
+            if (pvPListEntry.playerUuid().equals(playerUuid)) {
                 state = pvPListEntry.state();
                 break;
             }
@@ -164,8 +160,8 @@ public class PvPList {
     }
 
     public void timestamp(UUID playerUuid, long timestamp) {
-        for (PvPListEntry pvPListEntry : pvplistEntrys) {
-            if (playerUuid == pvPListEntry.playerUuid()) {
+        for (PvPListEntry pvPListEntry : pvplistEntries) {
+            if (pvPListEntry.playerUuid().equals(playerUuid)) {
                 pvPListEntry.timestamp(timestamp);
                 break;
             }
@@ -173,8 +169,8 @@ public class PvPList {
     }
 
     public boolean equalsPlayerUuid(UUID playerUuid) {
-        for (PvPListEntry pvPListEntry : pvplistEntrys) {
-            if (playerUuid == pvPListEntry.playerUuid()) {
+        for (PvPListEntry pvPListEntry : pvplistEntries) {
+            if (pvPListEntry.playerUuid().equals(playerUuid)) {
                 return true;
             }
         }
