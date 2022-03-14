@@ -2,19 +2,12 @@ package de.crafttogether.pvptoggle.listener;
 
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
 import de.crafttogether.pvptoggle.util.MySQLAdapter;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.UUID;
-import java.util.logging.Logger;
 
 
 public class OnPlayerJoin implements Listener {
@@ -47,5 +40,8 @@ public class OnPlayerJoin implements Listener {
 
             plugin.pvplist.add(player.getUniqueId());
         }
+
+        plugin.pvplist.updateDatabase(player.getUniqueId());
+
     }
 }
