@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class PvPListSQL {
 
@@ -56,5 +57,96 @@ public class PvPListSQL {
             }
             connection.close();
         }, connection.getTablePrefix() + "pvplist");
+    }
+
+    public static void updateTimestampFromDataBase(UUID playerUuid) {
+        PvPTogglePlugin plugin = PvPTogglePlugin.getInstance();
+
+        MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
+        connection.queryAsync("SELECT `cooldownTimestamp` FROM `%s` WHERE `uuid` = '%s'", (err, result) -> {
+            if (err != null)
+                plugin.getLogger().warning("[MySQL]: " + err.getMessage());
+            try {
+                while (result.next()) {
+                    long timestamp = result.getLong("cooldownTimestamp");
+                    plugin.pvplist.timestamp(playerUuid, timestamp);
+                }
+
+            } catch (SQLException e) {
+                PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
+            } finally {
+                connection.close();
+            }
+        }, connection.getTablePrefix() + "pvplist", playerUuid);
+    }
+
+    public static void updateStateFromDataBase(UUID playerUuid) {
+        PvPTogglePlugin plugin = PvPTogglePlugin.getInstance();
+
+        MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
+        connection.queryAsync("SELECT `pvpstate` FROM `%s` WHERE `uuid` = '%s'", (err, result) -> {
+            if (err != null)
+                plugin.getLogger().warning("[MySQL]: " + err.getMessage());
+            try {
+                while (result.next()) {
+                    boolean state = result.getBoolean("pvpstate");
+                    plugin.pvplist.state(playerUuid, state);
+                }
+
+            } catch (SQLException e) {
+                PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
+            } finally {
+                connection.close();
+            }
+        }, connection.getTablePrefix() + "pvplist", playerUuid);
+    }
+
+    public static void updateState(Player player, boolean state) {
+        PvPTogglePlugin plugin = PvPTogglePlugin.getInstance();
+
+        if (state) {
+            if (plugin.getConfig().getBoolean("Settings.Debug"))
+                plugin.getLogger().info("[MySQL]: Updating pvp-state of player '" + player.getName() + "' to 1 (enabled) ...");
+
+            MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
+            connection.updateAsync("UPDATE %s SET `pvpstate` = '1' WHERE `uuid` = '%s'", (err, affectedRows) -> {
+                if (err != null)
+                    plugin.getLogger().warning("[MySQL]: " + err.getMessage());
+                plugin.updateAllProxyCachesCommand(player);
+                connection.close();
+            }, connection.getTablePrefix() + "pvplist", player.getUniqueId());
+        } else {
+            if (plugin.getConfig().getBoolean("Settings.Debug"))
+                plugin.getLogger().info("[MySQL]: Updating pvp-state of player '" + player.getName() + "' to 0 (disabled) ...");
+
+            MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
+
+            connection.updateAsync("UPDATE %s SET `pvpstate` = '0' WHERE `uuid` = '%s'", (err, affectedRows) -> {
+                if (err != null)
+                    plugin.getLogger().warning("[MySQL]: " + err.getMessage());
+                if (PvPTogglePlugin.getPreloadConfig().getBoolean("BungeeCord.Enable"))
+                    plugin.updateAllProxyCachesCommand(player);
+                connection.close();
+            }, connection.getTablePrefix() + "pvplist", player.getUniqueId());
+        }
+    }
+
+    public static void updateTimestamp(Player player) {
+        updateTimestamp(player, System.currentTimeMillis());
+    }
+
+    public static void updateTimestamp(Player player, long timestamp) {
+        PvPTogglePlugin plugin = PvPTogglePlugin.getInstance();
+
+        if (!plugin.getConfig().getBoolean("Settings.Cooldown"))
+            return;
+
+        MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
+        connection.updateAsync("UPDATE %s SET `cooldownTimestamp` = '%s' WHERE `uuid` = '%s'", (err, affectedRows) -> {
+            if (err != null)
+                plugin.getLogger().warning("[MySQL]: " + err.getMessage());
+            plugin.updateAllProxyCachesCommand(player);
+            connection.close();
+        }, connection.getTablePrefix() + "pvplist", timestamp, player.getUniqueId());
     }
 }
