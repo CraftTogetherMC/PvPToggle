@@ -1,6 +1,7 @@
 package de.crafttogether.pvptoggle.commands;
 
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
+import de.crafttogether.pvptoggle.pvplist.PvPListSQL;
 import de.crafttogether.pvptoggle.util.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -26,7 +27,7 @@ public class PvpCommand implements TabExecutor {
         }
 
         if (!plugin.pvplist.equalsPlayerUuid(player.getUniqueId())) {
-            plugin.updatePvplist();
+            PvPListSQL.updatePvplist();
             player.sendMessage(Objects.requireNonNull(config.getString("Message.PvP_Error")));
             return false;
         }
@@ -62,7 +63,7 @@ public class PvpCommand implements TabExecutor {
         return false;
     }
 
-    private void pvp(Player target) {
+    private boolean pvp(Player target) {
         boolean state = plugin.pvplist.state(target.getUniqueId());
 
         if (state && config.getBoolean("Settings.Cooldown")) {
@@ -73,33 +74,36 @@ public class PvpCommand implements TabExecutor {
             } else if (left == -1) {
                 target.sendMessage(Objects.requireNonNull(config.getString("Message.PvP_Error")));
             } else {
-                plugin.pvplist.state(target.getUniqueId(), false);
+                PvPListSQL.updateDatabaseState(target, plugin.pvplist.state(target.getUniqueId(), false));
                 target.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_OFF")), target.getName()));
             }
         } else {
-            plugin.pvplist.state(target.getUniqueId(), !state);
+            PvPListSQL.updateDatabaseState(target, plugin.pvplist.state(target.getUniqueId(), !state));
             if (!state) {
                 plugin.pvplist.timestamp(target.getUniqueId(), System.currentTimeMillis());
+                PvPListSQL.updateDatabaseTimestamp(target);
                 target.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_ON")), target.getName()));
             }
             else
                 target.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_OFF")), target.getName()));
         }
+
+        return state;
     }
 
-    private void pvp(Player target, Player player) {
-        if (isTargetNotAlright(target, player)) return;
+    private boolean pvp(Player target, Player player) {
+        if (isTargetNotAlright(target, player)) return false;
 
-        pvpChange(target, player, !plugin.pvplist.state(target.getUniqueId()));
+        return pvpChange(target, player, !plugin.pvplist.state(target.getUniqueId()));
     }
 
-    private void pvp(Player target, Player player, boolean state) {
-        if (isTargetNotAlright(target, player)) return;
+    private boolean pvp(Player target, Player player, boolean state) {
+        if (isTargetNotAlright(target, player)) return state;
 
-        pvpChange(target, player, state);
+        return pvpChange(target, player, state);
     }
 
-    private void pvpChange(Player target, Player player, boolean state) {
+    private boolean pvpChange(Player target, Player player, boolean state) {
         if (plugin.pvplist.state(target.getUniqueId(), state)) {
             plugin.pvplist.timestamp(target.getUniqueId(), System.currentTimeMillis());
             if (player != target) {
@@ -112,6 +116,8 @@ public class PvpCommand implements TabExecutor {
             }
             player.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Toggle_Other_OFF")), player.getName(), target.getName()));
         }
+
+        return state;
     }
 
     private boolean isTargetNotAlright(Player target, Player sender) {
@@ -120,7 +126,7 @@ public class PvpCommand implements TabExecutor {
             return true;
         }
         if (!plugin.pvplist.equalsPlayerUuid(target.getUniqueId())) {
-            plugin.updatePvplist();
+            PvPListSQL.updatePvplist();
             sender.sendMessage(Objects.requireNonNull(config.getString("Message.PvP_Error")));
             return true;
         }

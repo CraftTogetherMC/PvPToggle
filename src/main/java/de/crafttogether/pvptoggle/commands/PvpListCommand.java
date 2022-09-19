@@ -42,7 +42,7 @@ public class PvpListCommand implements TabExecutor {
                     names.add(current.getName());
                 }
 
-                PvPListSQL.sendPvplistFromDatabaseToPvPList(player, names);
+                PvPListSQL.sendMessagePvplist(player, names);
             }
 
         }

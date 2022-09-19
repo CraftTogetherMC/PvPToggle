@@ -50,25 +50,16 @@ public class PvPList {
 
         for (PvPListEntry pvPListEntry : pvplistEntries) {
             if (pvPListEntry.playerUuid().equals(playerUuid)) {
-                Player player = Bukkit.getPlayer(playerUuid);
-                boolean state = pvPListEntry.state(!pvPListEntry.state());
-                if (state)
-                    PvPListSQL.updateTimestamp(player);
-                PvPListSQL.updateState(player, state);
-
-                return state;
+                return pvPListEntry.state(!pvPListEntry.state());
             }
         }
+
         return false;
     }
 
     public boolean state(UUID playerUuid, boolean state) {
         for (PvPListEntry pvPListEntry : pvplistEntries) {
             if (pvPListEntry.playerUuid().equals(playerUuid)) {
-                Player player = Bukkit.getPlayer(playerUuid);
-                if (state)
-                    PvPListSQL.updateTimestamp(player);
-                PvPListSQL.updateState(player, state);
                 pvPListEntry.state(state);
                 break;
             }
@@ -121,8 +112,4 @@ public class PvPList {
         return -1;
     }
 
-    public void updateDatabase(UUID playerUuid) {
-        PvPListSQL.updateStateFromDataBase(playerUuid);
-        PvPListSQL.updateTimestampFromDataBase(playerUuid);
-    }
 }

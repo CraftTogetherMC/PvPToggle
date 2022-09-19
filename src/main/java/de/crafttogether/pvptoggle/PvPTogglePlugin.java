@@ -66,6 +66,8 @@ public class PvPTogglePlugin extends JavaPlugin {
         getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new OnPluginMessageReceived());
 
         setupMySql(config);
+
+        setupPvplist();
     }
 
     @Override
@@ -126,7 +128,6 @@ public class PvPTogglePlugin extends JavaPlugin {
             if (getConfig().getBoolean("Settings.Debug"))
                 getLogger().info("[MySQL]: Select uuid, pvpstate, timestamp ...");
 
-            updatePvplist();
         }
     }
 
@@ -152,7 +153,7 @@ public class PvPTogglePlugin extends JavaPlugin {
         player.sendPluginMessage(PvPTogglePlugin.getInstance(), "BungeeCord", out.toByteArray());
     }
 
-    public void updatePvplist() {
+    public void setupPvplist () {
         MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
         connection.queryAsync("SELECT `uuid`, `pvpstate`, `cooldownTimestamp` FROM `%s`", (err, result) -> {
             if (err != null)
@@ -168,7 +169,6 @@ public class PvPTogglePlugin extends JavaPlugin {
                 connection.close();
             }
         }, connection.getTablePrefix() + "pvplist");
-
     }
 
     private FileConfiguration preloadConfig(FileConfiguration config) {

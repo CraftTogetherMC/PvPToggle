@@ -2,6 +2,7 @@ package de.crafttogether.pvptoggle.pvplist;
 
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
 import de.crafttogether.pvptoggle.util.MySQLAdapter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +15,7 @@ import java.util.UUID;
 
 public class PvPListSQL {
 
-    public static void sendPvplistFromDatabaseToPvPList(@NotNull Player player, List<String> playerList) {
+    public static void sendMessagePvplist(@NotNull Player player, List<String> playerList) {
         Plugin plugin = PvPTogglePlugin.getInstance();
 
         if (plugin.getConfig().getBoolean("Settings.Debug"))
@@ -59,7 +60,7 @@ public class PvPListSQL {
         }, connection.getTablePrefix() + "pvplist");
     }
 
-    public static void updateTimestampFromDataBase(UUID playerUuid) {
+    public static void updateTimestampFromDatabase(UUID playerUuid) {
         PvPTogglePlugin plugin = PvPTogglePlugin.getInstance();
 
         MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
@@ -80,7 +81,7 @@ public class PvPListSQL {
         }, connection.getTablePrefix() + "pvplist", playerUuid);
     }
 
-    public static void updateStateFromDataBase(UUID playerUuid) {
+    public static void updateStateFromDatabase(UUID playerUuid) {
         PvPTogglePlugin plugin = PvPTogglePlugin.getInstance();
 
         MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
@@ -101,7 +102,7 @@ public class PvPListSQL {
         }, connection.getTablePrefix() + "pvplist", playerUuid);
     }
 
-    public static void updateState(Player player, boolean state) {
+    public static void updateDatabaseState(Player player, boolean state) {
         PvPTogglePlugin plugin = PvPTogglePlugin.getInstance();
 
         if (state) {
@@ -112,7 +113,6 @@ public class PvPListSQL {
             connection.updateAsync("UPDATE %s SET `pvpstate` = '1' WHERE `uuid` = '%s'", (err, affectedRows) -> {
                 if (err != null)
                     plugin.getLogger().warning("[MySQL]: " + err.getMessage());
-                plugin.updateAllProxyCachesCommand(player);
                 connection.close();
             }, connection.getTablePrefix() + "pvplist", player.getUniqueId());
         } else {
@@ -125,17 +125,16 @@ public class PvPListSQL {
                 if (err != null)
                     plugin.getLogger().warning("[MySQL]: " + err.getMessage());
                 if (PvPTogglePlugin.getPreloadConfig().getBoolean("BungeeCord.Enable"))
-                    plugin.updateAllProxyCachesCommand(player);
                 connection.close();
             }, connection.getTablePrefix() + "pvplist", player.getUniqueId());
         }
     }
 
-    public static void updateTimestamp(Player player) {
-        updateTimestamp(player, System.currentTimeMillis());
+    public static void updateDatabaseTimestamp(Player player) {
+        updateDatabaseTimestamp(player, System.currentTimeMillis());
     }
 
-    public static void updateTimestamp(Player player, long timestamp) {
+    public static void updateDatabaseTimestamp(Player player, long timestamp) {
         PvPTogglePlugin plugin = PvPTogglePlugin.getInstance();
 
         if (!plugin.getConfig().getBoolean("Settings.Cooldown"))
@@ -145,8 +144,29 @@ public class PvPListSQL {
         connection.updateAsync("UPDATE %s SET `cooldownTimestamp` = '%s' WHERE `uuid` = '%s'", (err, affectedRows) -> {
             if (err != null)
                 plugin.getLogger().warning("[MySQL]: " + err.getMessage());
-            plugin.updateAllProxyCachesCommand(player);
             connection.close();
         }, connection.getTablePrefix() + "pvplist", timestamp, player.getUniqueId());
+    }
+
+    public static void updatePvplist() {
+        PvPTogglePlugin plugin = PvPTogglePlugin.getInstance();
+        MySQLAdapter.MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
+        connection.queryAsync("SELECT `uuid`, `pvpstate`, `cooldownTimestamp` FROM `%s`", (err, result) -> {
+            if (err != null)
+                plugin.getLogger().warning("[MySQL]: " + err.getMessage());
+            try {
+                while (result.next()) {
+                    UUID playerUuid = UUID.fromString(result.getString("uuid"));
+                    plugin.pvplist.state(playerUuid, result.getBoolean("pvpstate"));
+                    plugin.pvplist.timestamp(playerUuid, result.getLong("cooldownTimestamp"));
+                }
+
+            } catch (SQLException e) {
+                PvPTogglePlugin.getInstance().getLogger().warning(e.getMessage());
+            } finally {
+                connection.close();
+            }
+        }, connection.getTablePrefix() + "pvplist");
+
     }
 }
