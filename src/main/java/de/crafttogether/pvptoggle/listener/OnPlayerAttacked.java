@@ -1,11 +1,11 @@
 package de.crafttogether.pvptoggle.listener;
 
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
+import de.crafttogether.pvptoggle.pvplist.PvPList;
 import de.crafttogether.pvptoggle.util.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.Configuration;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -50,7 +50,7 @@ public class OnPlayerAttacked implements Listener {
                 Projectile projectile = (Projectile) e.getDamager();
                 projectile.getShooter();
                 if (projectile.getType() != EntityType.SNOWBALL && projectile.getType() != EntityType.ENDER_PEARL && projectile.getType() != EntityType.EGG) {
-                    if (projectile.getShooter() instanceof Player att && e.getEntity() instanceof Player pl && att != pl) {
+                    if (projectile.getShooter() instanceof Player att && e.getEntity() instanceof Player pl) {
                         e.setCancelled(pvplistCheck(pl, att));
                     }
                 }
@@ -73,11 +73,13 @@ public class OnPlayerAttacked implements Listener {
                         if (pet.getOwner() != null) {
                             Player owner = Bukkit.getPlayer(pet.getOwner().getUniqueId());
                             Player pl = (Player) e.getEntity();
-                            HashMap<UUID, Boolean> pvplist = PvPTogglePlugin.pvpList();
+
+                            PvPList pvplist = PvPTogglePlugin.getInstance().pvplist;
+
 
                             assert owner != null;
-                            if (pvplist.containsKey(owner.getUniqueId()) || pvplist.containsKey(pl.getUniqueId())) {
-                                if (!pvplist.get(owner.getUniqueId()) || !pvplist.get(pl.getUniqueId())) {
+                            if (pvplist.equalsPlayerUuid(owner.getUniqueId()) || pvplist.equalsPlayerUuid(pl.getUniqueId())) {
+                                if (!pvplist.state(owner.getUniqueId()) || !pvplist.state(pl.getUniqueId())) {
                                     e.setCancelled(true);
                                 }
                             } else e.setCancelled(true);
@@ -94,7 +96,8 @@ public class OnPlayerAttacked implements Listener {
         if (e.getEntity().getSource() instanceof Player attacking) {
             for (Entity entity : e.getAffectedEntities()) {
                 if (entity instanceof Player player) {
-                    if ((!PvPTogglePlugin.pvpList().containsKey(player.getUniqueId()) || !PvPTogglePlugin.pvpList().containsKey(attacking.getUniqueId())) &&
+                    PvPList pvplist = PvPTogglePlugin.getInstance().pvplist;
+                    if ((!pvplist.equalsPlayerUuid(player.getUniqueId()) || !pvplist.equalsPlayerUuid(attacking.getUniqueId())) &&
                             player != attacking) {
                         e.setCancelled(true);
                     }
@@ -128,7 +131,8 @@ public class OnPlayerAttacked implements Listener {
                     if (entity instanceof Player player) {
 
                         // Beide/player/attacking sind nicht in der Liste
-                        if ((!PvPTogglePlugin.pvpList().containsKey(player.getUniqueId()) || !PvPTogglePlugin.pvpList().containsKey(attacking.getUniqueId())) &&
+                        PvPList pvplist = PvPTogglePlugin.getInstance().pvplist;
+                        if ((!pvplist.equalsPlayerUuid(player.getUniqueId()) || !pvplist.equalsPlayerUuid(attacking.getUniqueId())) &&
                                 player != attacking) {
                             e.setCancelled(true);
                         }
@@ -172,29 +176,27 @@ public class OnPlayerAttacked implements Listener {
     }
 
     private boolean pvplistCheck(Player player, Player attacking) {
-        HashMap<UUID, Boolean> pvplist = PvPTogglePlugin.pvpList();
-
-        if (!pvplist.containsKey(player.getUniqueId()) || !pvplist.containsKey(attacking.getUniqueId()))
-            return true;
-
-        Configuration config = PvPTogglePlugin.getPreloadConfig();
+        PvPList pvplist = PvPTogglePlugin.getInstance().pvplist;
 
         if (player == attacking) {
             return false;
         }
 
-        if (!pvplist.get(player.getUniqueId()) && !pvplist.get(attacking.getUniqueId())) {
+        if (!pvplist.equalsPlayerUuid(player.getUniqueId()) || !pvplist.equalsPlayerUuid(attacking.getUniqueId()))
+            return true;
+
+        Configuration config = PvPTogglePlugin.getPreloadConfig();
+
+        if (!pvplist.state(player.getUniqueId()) && !pvplist.state(attacking.getUniqueId())) {
             attacking.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), attacking.getName(), player.getName()));
             return true;
-        } else if (pvplist.get(player.getUniqueId()) && !pvplist.get(attacking.getUniqueId())) {
+        } else if (pvplist.state(player.getUniqueId()) && !pvplist.state(attacking.getUniqueId())) {
             attacking.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), attacking.getName(), player.getName()));
             return true;
-        } else if (!pvplist.get(player.getUniqueId()) && pvplist.get(attacking.getUniqueId())) {
+        } else if (!pvplist.state(player.getUniqueId()) && pvplist.state(attacking.getUniqueId())) {
             attacking.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), attacking.getName(), player.getName()));
             return true;
         }
         return false;
     }
-
-
 }
