@@ -139,7 +139,7 @@ public class OnPlayerAttacked implements Listener {
                     }
                     else if (entity instanceof Tameable pet) {
                         if (pet.getOwner() != null && pet.getOwner().getUniqueId() != attacking.getUniqueId()) {
-                            attacking.sendMessage(Util.format(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Pet_Protect"), attacking.getName(), pet.getOwner().getName(), Util.translator(entity.getName())));
+                            attacking.sendMessage(Util.format(Objects.requireNonNull(PvPTogglePlugin.getPreloadConfig().getString("Message.PvP_Pet_Protect")), attacking.getName(), pet.getOwner().getName(), Util.translator(entity.getName())));
                             e.setCancelled(true);
                         }
                     }
@@ -164,12 +164,12 @@ public class OnPlayerAttacked implements Listener {
                 } else if (pet.getOwner() != attacking) {
                     OfflinePlayer p = Bukkit.getOfflinePlayer(pet.getOwner().getUniqueId());
                     // attacking.sendMessage(Util.format(config.getString("Message.PvP_Offline"), attacking.getName(), p.getName(), entityType.toString()));
-                    attacking.sendMessage(Util.format(config.getString("Message.PvP_Pet_Protect"), attacking.getName(), pet.getOwner().getName(), Util.translator(pet.getName())));
+                    attacking.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Pet_Protect")), attacking.getName(), pet.getOwner().getName(), Util.translator(pet.getName())));
                     return true;
                 }
             }
         } else {
-            attacking.sendMessage(Util.format(config.getString("Message.PvP_Pet_Protect"), attacking.getName(), pet.getOwner().getName(), Util.translator(pet.getName())));
+            attacking.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_Pet_Protect")), attacking.getName(), pet.getOwner().getName(), Util.translator(pet.getName())));
             return true;
         }
         return false;
@@ -188,13 +188,13 @@ public class OnPlayerAttacked implements Listener {
         Configuration config = PvPTogglePlugin.getPreloadConfig();
 
         if (!pvplist.state(player.getUniqueId()) && !pvplist.state(attacking.getUniqueId())) {
-            attacking.sendMessage(Util.format(config.getString("Message.PvP_False_Both"), attacking.getName(), player.getName()));
+            attacking.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_False_Both")), attacking.getName(), player.getName()));
             return true;
         } else if (pvplist.state(player.getUniqueId()) && !pvplist.state(attacking.getUniqueId())) {
-            attacking.sendMessage(Util.format(config.getString("Message.PvP_False_Self"), attacking.getName(), player.getName()));
+            attacking.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_False_Self")), attacking.getName(), player.getName()));
             return true;
         } else if (!pvplist.state(player.getUniqueId()) && pvplist.state(attacking.getUniqueId())) {
-            attacking.sendMessage(Util.format(config.getString("Message.PvP_False_Other"), attacking.getName(), player.getName()));
+            attacking.sendMessage(Util.format(Objects.requireNonNull(config.getString("Message.PvP_False_Other")), attacking.getName(), player.getName()));
             return true;
         }
         return false;

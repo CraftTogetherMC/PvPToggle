@@ -25,7 +25,7 @@ public class PvpListCommand implements TabExecutor {
 
         if (sender instanceof Player player) {
             if (!player.hasPermission("pvptoggle.pvp.list")) {
-                player.sendMessage(config.getString("Message.PvP_NoPerm"));
+                player.sendMessage(Objects.requireNonNull(config.getString("Message.PvP_NoPerm")));
                 return false;
             }
 
