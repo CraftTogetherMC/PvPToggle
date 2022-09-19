@@ -1,6 +1,7 @@
 package de.crafttogether.pvptoggle.listener;
 
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
+import de.crafttogether.pvptoggle.pvplist.PvPListSQL;
 import de.crafttogether.pvptoggle.util.MySQLAdapter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -41,7 +42,8 @@ public class OnPlayerJoin implements Listener {
             plugin.pvplist.add(player.getUniqueId());
         }
 
-        plugin.pvplist.updateDatabase(player.getUniqueId());
+        PvPListSQL.updateStateFromDatabase(player.getUniqueId());
+        PvPListSQL.updateTimestampFromDatabase(player.getUniqueId());
 
     }
 }
