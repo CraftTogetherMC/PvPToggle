@@ -27,7 +27,7 @@ public class OnPluginMessageReceived implements PluginMessageListener {
             if (server.equals("ALL")) {
                 String[] playerList = in.readUTF().split(", ");
 
-                PvPListSQL.sendPvplistFromDatabaseToPvPList(player, Arrays.stream(playerList).toList());
+                PvPListSQL.sendMessagePvplist(player, Arrays.stream(playerList).toList());
             }
         }
         else if (subchannel.equals("pvptoggle")) {
@@ -49,7 +49,7 @@ public class OnPluginMessageReceived implements PluginMessageListener {
                 if (plugin.getConfig().getBoolean("Settings.Debug"))
                     plugin.getLogger().info("[MySQL]: Select uuid, pvpstate ...");
 
-                PvPTogglePlugin.getInstance().updatePvplist();
+                PvPListSQL.updatePvplist();
             }
         }
     }
