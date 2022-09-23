@@ -17,6 +17,8 @@ import java.util.*;
 
 public class PvpListCommand implements TabExecutor {
 
+    boolean waiting = false;
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
@@ -34,6 +36,7 @@ public class PvpListCommand implements TabExecutor {
                 out.writeUTF("PlayerList");
                 out.writeUTF("ALL");
                 player.sendPluginMessage(PvPTogglePlugin.getInstance(), "BungeeCord", out.toByteArray());
+                waiting = true;
             } else {
 
                 ArrayList<String> names = new ArrayList<>();
@@ -49,7 +52,14 @@ public class PvpListCommand implements TabExecutor {
         return false;
     }
 
+    public boolean waiting() {
+        return waiting(waiting);
+    }
 
+    public boolean waiting(boolean state) {
+        waiting = state;
+        return waiting;
+    }
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender arg0, @NotNull Command arg1, @NotNull String arg2, String[] arg3) {

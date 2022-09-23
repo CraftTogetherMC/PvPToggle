@@ -3,6 +3,7 @@ package de.crafttogether.pvptoggle.listener;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import de.crafttogether.pvptoggle.PvPTogglePlugin;
+import de.crafttogether.pvptoggle.commands.PvpListCommand;
 import de.crafttogether.pvptoggle.pvplist.PvPListSQL;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -20,9 +21,13 @@ public class OnPluginMessageReceived implements PluginMessageListener {
         if (!channel.equals("BungeeCord")) {
             return;
         }
+
+        PvpListCommand pvpListCommand = PvPTogglePlugin.pvpListCommand();
+
         ByteArrayDataInput in = ByteStreams.newDataInput(message);
         String subchannel = in.readUTF();
-        if (subchannel.equals("PlayerList")) { // from PvpListCommand
+        if (subchannel.equals("PlayerList") && pvpListCommand.waiting()) { // from PvpListCommand
+            pvpListCommand.waiting(false);
             String server = in.readUTF();
             if (server.equals("ALL")) {
                 String[] playerList = in.readUTF().split(", ");

@@ -37,6 +37,7 @@ public class PvPTogglePlugin extends JavaPlugin {
     private static FileConfiguration config;
     private static MySQLAdapter mySQL;
     public PvPList pvplist = new PvPList();
+    private static PvpListCommand pvplistcommand = new PvpListCommand();
 
     @Override
     public void onEnable() {
@@ -55,7 +56,7 @@ public class PvPTogglePlugin extends JavaPlugin {
         config = preloadConfig(getConfig());
 
         Objects.requireNonNull(getCommand("pvp")).setExecutor(new PvpCommand());
-        Objects.requireNonNull(getCommand("pvplist")).setExecutor(new PvpListCommand());
+        Objects.requireNonNull(getCommand("pvplist")).setExecutor(pvplistcommand);
         Objects.requireNonNull(getCommand("pvpstate")).setExecutor(new PvpState());
 
         PluginManager pluginManager = Bukkit.getPluginManager();
@@ -151,6 +152,11 @@ public class PvPTogglePlugin extends JavaPlugin {
         out.writeShort(msgbytes.toByteArray().length);
         out.write(msgbytes.toByteArray());
         player.sendPluginMessage(PvPTogglePlugin.getInstance(), "BungeeCord", out.toByteArray());
+
+        out = ByteStreams.newDataOutput();
+        out.writeUTF("PlayerList");
+        out.writeUTF("ALL");
+        player.sendPluginMessage(PvPTogglePlugin.getInstance(), "BungeeCord", out.toByteArray());
     }
 
     public void setupPvplist () {
@@ -198,5 +204,9 @@ public class PvPTogglePlugin extends JavaPlugin {
 
     public static MySQLAdapter getMySQL() {
         return mySQL;
+    }
+
+    public static PvpListCommand pvpListCommand() {
+        return pvplistcommand;
     }
 }
