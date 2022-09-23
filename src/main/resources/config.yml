@@ -26,6 +26,7 @@ Message:
   PvP_Wrong_Command: '&cBefehl nicht erkannt!' #NoParameter
   PvP_NoPerm: '&cKeine Berechtigung!' #NoParameter
   PvP_Nobody: '&cNiemand!' #NoParameter
+  PvP_Info: '&6Du hast dem PvP-Modus aktiviert. Nutze /pvp um ihn wieder zu deaktivieren.' #available: <player>
   PvP_Error: '&cDein Befehl konnte nicht verarbeitet werden. Bitte versuchs erneut!' #NoParameter
 
 BlockedWorldList:
