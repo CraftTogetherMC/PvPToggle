@@ -39,4 +39,28 @@ public class Util {
             default -> entityName;
         };
     }
+
+    public static String format(String message, String playerName, long cooldownTimeMillis) {
+        String a = message.replace("<player>", playerName);
+        String b = a.replace("<cooldown>", formatCooldown(cooldownTimeMillis));
+        return ChatColor.translateAlternateColorCodes('&', b);
+    }
+
+    private static String formatCooldown(long CooldownMilli) {
+        long CooldownSec = CooldownMilli/1000;
+
+        if (CooldownSec <= 1) {
+            return "1 Sekunde";
+        } else if (CooldownSec <= 59) {
+            return CooldownSec + " Sekunden";
+        } else if (CooldownSec <= 60+59) {
+            return "1 Minute";
+        } else if (CooldownSec <= 60*59+59) {
+            return CooldownSec/60 + " Minuten";
+        } else if (CooldownSec <= 60*60+60*59+59) {
+            return "1 Stunde";
+        }
+        return CooldownSec/60/60 + " Stunden";
+    }
+
 }

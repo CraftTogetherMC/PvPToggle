@@ -2,6 +2,8 @@
 Settings:
   Tamed_Pet_Protect: true
   Debug: false
+  Cooldown: true
+  Cooldown_Time: 30 #seconds
 
 # message | parameter: <player> <target> <pet> | color char: &
 Message:
@@ -16,6 +18,7 @@ Message:
   PvP_False_Other: '&b<target> &6hat PVP deaktiviert!' #available: <player> <target>
   PvP_State_ON: '&6Dein PvP Modus ist eingeschaltet!' #available: <player>
   PvP_State_OFF: '&6Dein PvP Modus ist ausgeschaltet!' #available: <player>
+  PvP_Cooldown: '&6Bitte warte noch &a<cooldown> &6um den PvP Modus zu verlassen!' #avaiable: <player> <cooldown>
   PvP_Pet_Protect: '&6Diese(r) &b<pet> &6steht unter dem Schutz von &b<target>&6!' #available: <pet> <player> <target>
   PvP_List: '&6Diese Spieler leben gefährlich!' #NoParameter
   PvP_NotFound: '&cSpieler nicht gefunden' #NoParameter
@@ -23,7 +26,8 @@ Message:
   PvP_Wrong_Command: '&cBefehl nicht erkannt!' #NoParameter
   PvP_NoPerm: '&cKeine Berechtigung!' #NoParameter
   PvP_Nobody: '&cNiemand!' #NoParameter
-  PvP_Error: '&cDein Befehl konnte nicht verarbeitet. Bitte versuchs erneut!' #NoParameter
+  PvP_Info: '&6Du hast dem PvP-Modus aktiviert. Nutze /pvp um ihn wieder zu deaktivieren.' #available: <player>
+  PvP_Error: '&cDein Befehl konnte nicht verarbeitet werden. Bitte versuchs erneut!' #NoParameter
 
 BlockedWorldList:
  # - Spawn
@@ -37,3 +41,6 @@ MySQL:
   TablePrefix: 'pt_'
   Username: 'yourUsername'
   Password: 'yourPassword'
+
+BungeeCord:
+  Enable: false

@@ -8,6 +8,7 @@ import de.crafttogether.pvptoggle.commands.PvpState;
 import de.crafttogether.pvptoggle.listener.OnPlayerAttacked;
 import de.crafttogether.pvptoggle.listener.OnPlayerJoin;
 import de.crafttogether.pvptoggle.listener.OnPluginMessageReceived;
+import de.crafttogether.pvptoggle.pvplist.PvPList;
 import de.crafttogether.pvptoggle.util.MySQLAdapter;
 import de.crafttogether.pvptoggle.util.MySQLAdapter.MySQLConfig;
 import de.crafttogether.pvptoggle.util.MySQLAdapter.MySQLConnection;
@@ -28,14 +29,15 @@ import java.sql.SQLException;
 import java.util.*;
 
 /*
-	Dieses Plugin wurde von Kaai für CT enwtickelt.
+	Dieses Plugin wurde von Kaai für CT entwickelt.
  */
 
 public class PvPTogglePlugin extends JavaPlugin {
     private static PvPTogglePlugin plugin;
     private static FileConfiguration config;
     private static MySQLAdapter mySQL;
-    private static final HashMap<UUID, Boolean> pvplist = new HashMap<>();
+    public PvPList pvplist = new PvPList();
+    private static PvpListCommand pvplistcommand = new PvpListCommand();
 
     @Override
     public void onEnable() {
@@ -49,9 +51,13 @@ public class PvPTogglePlugin extends JavaPlugin {
 
         plugin = this;
 
-        getCommand("pvp").setExecutor(new PvpCommand());
-        getCommand("pvplist").setExecutor(new PvpListCommand());
-        getCommand("pvpstate").setExecutor(new PvpState());
+        getConfig();
+        saveDefaultConfig();
+        config = preloadConfig(getConfig());
+
+        Objects.requireNonNull(getCommand("pvp")).setExecutor(new PvpCommand());
+        Objects.requireNonNull(getCommand("pvplist")).setExecutor(pvplistcommand);
+        Objects.requireNonNull(getCommand("pvpstate")).setExecutor(new PvpState());
 
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new OnPlayerAttacked(), this);
@@ -60,11 +66,9 @@ public class PvPTogglePlugin extends JavaPlugin {
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new OnPluginMessageReceived());
 
-        getConfig();
-        saveDefaultConfig();
-        config = preloadConfig(getConfig());
-
         setupMySql(config);
+
+        setupPvplist();
     }
 
     @Override
@@ -111,6 +115,7 @@ public class PvPTogglePlugin extends JavaPlugin {
                         "`playername` VARCHAR(16) NOT NULL , " +
                         "`uuid` VARCHAR(36) NOT NULL , " +
                         "`pvpstate` BOOLEAN NULL DEFAULT NULL , " +
+                        "`cooldownTimestamp` BIGINT(13) NULL DEFAULT NULL , " +
                         "PRIMARY KEY (`id`), INDEX (`uuid`)) ENGINE = InnoDB;";
 
                 connection.execute(query, myCfg.getDatabase(), myCfg.getTablePrefix() + "pvplist");
@@ -122,13 +127,15 @@ public class PvPTogglePlugin extends JavaPlugin {
             }
 
             if (getConfig().getBoolean("Settings.Debug"))
-                getLogger().info("[MySQL]: Select uuid, pvpstate ...");
+                getLogger().info("[MySQL]: Select uuid, pvpstate, timestamp ...");
 
-            updatePvplist();
         }
     }
 
     public void updateAllProxyCachesCommand(Player player) {
+        if (!PvPTogglePlugin.getPreloadConfig().getBoolean("BungeeCord.Enable"))
+            return;
+
         // update other bungeeCord connections caches
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Forward");
@@ -145,16 +152,21 @@ public class PvPTogglePlugin extends JavaPlugin {
         out.writeShort(msgbytes.toByteArray().length);
         out.write(msgbytes.toByteArray());
         player.sendPluginMessage(PvPTogglePlugin.getInstance(), "BungeeCord", out.toByteArray());
+
+        out = ByteStreams.newDataOutput();
+        out.writeUTF("PlayerList");
+        out.writeUTF("ALL");
+        player.sendPluginMessage(PvPTogglePlugin.getInstance(), "BungeeCord", out.toByteArray());
     }
 
-    public void updatePvplist() {
+    public void setupPvplist () {
         MySQLConnection connection = PvPTogglePlugin.getMySQL().getConnection();
-        connection.queryAsync("SELECT `uuid`, `pvpstate` FROM `%s`", (err, result) -> {
+        connection.queryAsync("SELECT `uuid`, `pvpstate`, `cooldownTimestamp` FROM `%s`", (err, result) -> {
             if (err != null)
                 getLogger().warning("[MySQL]: " + err.getMessage());
             try {
                 while (result.next()) {
-                    pvplist.put(UUID.fromString(result.getString("uuid")), result.getBoolean("pvpstate"));
+                    pvplist.add(UUID.fromString(result.getString("uuid")), result.getBoolean("pvpstate"), result.getLong("cooldownTimestamp"));
                 }
 
             } catch (SQLException e) {
@@ -186,21 +198,15 @@ public class PvPTogglePlugin extends JavaPlugin {
         return config;
     }
 
-    public static HashMap<UUID, Boolean> pvpList() {
-        return pvplist;
-    }
-
-    public static HashMap<UUID, Boolean> pvpList(UUID playeruuid, boolean state) {
-        if (!pvplist.containsKey(playeruuid)) pvplist.remove(playeruuid);
-        pvplist.put(playeruuid, state);
-        return pvplist;
-    }
-
     public static PvPTogglePlugin getInstance() {
         return plugin;
     }
 
     public static MySQLAdapter getMySQL() {
         return mySQL;
+    }
+
+    public static PvpListCommand pvpListCommand() {
+        return pvplistcommand;
     }
 }

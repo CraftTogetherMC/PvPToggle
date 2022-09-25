@@ -133,7 +133,7 @@ public class MySQLAdapter {
             if (args.length > 0) statement = String.format(statement, args);
             String finalStatement = statement;
 
-            Boolean result = false;
+            boolean result = false;
             try {
                 connection = dataSource.getConnection();
                 preparedStatement = connection.prepareStatement(finalStatement);
@@ -251,7 +251,7 @@ public class MySQLAdapter {
             }
 
             return this;
-        };
+        }
 
         public String getTablePrefix() {
             return config.getTablePrefix();
