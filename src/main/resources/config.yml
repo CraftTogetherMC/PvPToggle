@@ -4,30 +4,31 @@ Settings:
   Debug: false
   Cooldown: true
   Cooldown_Time: 30 #seconds
+  Reminder_Reset: 0.0 #hours, range: 0.0 - 24.0
 
 # message | parameter: <player> <target> <pet> | color char: &
 Message:
   PvP_Toggle_ON: '&6Dein PvP Modus ist aktiviert!' #available: <player>
   PvP_Toggle_OFF: '&6Dein PvP Modus ist deaktiviert!' #available: <player>
-  PvP_Toggle_Other_ON: '&6Du hast den Pvp Modus von &b<target> &6aktiviert!' #available: <player> <target>
-  PvP_Toggle_Other_OFF: '&6Du hast den Pvp Modus von &b<target> &6deaktiviert!' #available: <player> <target>
-  PvP_Toggle_Other_ON_Target: '&b<player> &6hat dein Pvp Modus aktiviert!' #available: <player> <target>
-  PvP_Toggle_Other_OFF_Target: '&b<player> &6hat dein Pvp Modus deaktiviert!' #available: <player> <target>
-  PvP_False_Both: '&6Du und &b<target> &6haben PVP deaktiviert!' #available: <player> <target>
-  PvP_False_Self: '&6Du hast PVP deaktiviert!' #available: <player> <target>
-  PvP_False_Other: '&b<target> &6hat PVP deaktiviert!' #available: <player> <target>
+  PvP_Toggle_Other_ON: '&6Du hast den Pvp Modus von &b<target> &6aktiviert!' #available: <player>, <target>
+  PvP_Toggle_Other_OFF: '&6Du hast den Pvp Modus von &b<target> &6deaktiviert!' #available: <player>, <target>
+  PvP_Toggle_Other_ON_Target: '&b<player> &6hat dein Pvp Modus aktiviert!' #available: <player>, <target>
+  PvP_Toggle_Other_OFF_Target: '&b<player> &6hat dein Pvp Modus deaktiviert!' #available: <player>, <target>
+  PvP_False_Both: '&6Du und &b<target> &6haben PVP deaktiviert!' #available: <player>, <target>
+  PvP_False_Self: '&6Du hast PVP deaktiviert!' #available: <player>, <target>
+  PvP_False_Other: '&b<target> &6hat PVP deaktiviert!' #available: <player>, <target>
   PvP_State_ON: '&6Dein PvP Modus ist eingeschaltet!' #available: <player>
   PvP_State_OFF: '&6Dein PvP Modus ist ausgeschaltet!' #available: <player>
-  PvP_Cooldown: '&6Bitte warte noch &a<cooldown> &6um den PvP Modus zu verlassen!' #avaiable: <player> <cooldown>
-  PvP_Pet_Protect: '&6Diese(r) &b<pet> &6steht unter dem Schutz von &b<target>&6!' #available: <pet> <player> <target>
-  PvP_List: '&6Diese Spieler leben gefährlich!' #NoParameter
-  PvP_NotFound: '&cSpieler nicht gefunden' #NoParameter
-  PvP_Usage: '&cBitte /pvp <player> <true/false> benutzen!' #NoParameter
-  PvP_Wrong_Command: '&cBefehl nicht erkannt!' #NoParameter
-  PvP_NoPerm: '&cKeine Berechtigung!' #NoParameter
-  PvP_Nobody: '&cNiemand!' #NoParameter
-  PvP_Info: '&6Du hast dem PvP-Modus aktiviert. Nutze /pvp um ihn wieder zu deaktivieren.' #available: <player>
-  PvP_Error: '&cDein Befehl konnte nicht verarbeitet werden. Bitte versuchs erneut!' #NoParameter
+  PvP_Cooldown: '&6Bitte warte noch &a<cooldown> &6um den PvP Modus zu verlassen!' #avaiable: <player>, <cooldown>
+  PvP_Pet_Protect: '&6Diese(r) &b<pet> &6steht unter dem Schutz von &b<target>&6!' #available: <pet>, <player>, <target>
+  PvP_List: '&6Diese Spieler leben gefährlich!' #no parameter
+  PvP_NotFound: '&cSpieler nicht gefunden' #no parameter
+  PvP_Usage: '&cBitte /pvp <player> <true/false> benutzen!' #no parameter
+  PvP_Wrong_Command: '&cBefehl nicht erkannt!' #no parameter
+  PvP_NoPerm: '&cKeine Berechtigung!' #no parameter
+  PvP_Nobody: '&cNiemand!' #no parameter
+  PvP_Reminder: '&6Du hast dem PvP-Modus aktiviert. Nutze /pvp um ihn wieder zu deaktivieren.' #available: <player>
+  PvP_Error: '&cDein Befehl konnte nicht verarbeitet werden. Bitte versuchs erneut!' #no parameter
 
 BlockedWorldList:
  # - Spawn
